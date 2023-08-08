@@ -11,16 +11,6 @@ import (
 // 固定的主域名
 var staticMainDomains = []string{"com.cn", "org.cn", "net.cn", "ac.cn", "eu.org"}
 
-// Domains Ipv4/Ipv6 domains
-type Domains struct {
-	Ipv4Addr    string
-	Ipv4Cache   *cache.IpCache
-	Ipv4Domains []*Domain
-	Ipv6Addr    string
-	Ipv6Cache   *cache.IpCache
-	Ipv6Domains []*Domain
-}
-
 // Domain 域名实体
 type Domain struct {
 	DomainName   string
@@ -62,6 +52,16 @@ func (d Domain) GetCustomParams() url.Values {
 		}
 	}
 	return url.Values{}
+}
+
+// Domains Ipv4/Ipv6 domains
+type Domains struct {
+	Ipv4Addr    string
+	Ipv4Cache   *cache.IpCache
+	Ipv4Domains []*Domain
+	Ipv6Addr    string
+	Ipv6Cache   *cache.IpCache
+	Ipv6Domains []*Domain
 }
 
 // GetNewIp 接口/网卡/命令获得 ip 并校验用户输入的域名
