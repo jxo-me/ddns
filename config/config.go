@@ -9,7 +9,7 @@ import (
 
 const ConfigFilePathENV = "DDNS_CONFIG_FILE_PATH"
 
-var cache = &cacheType{}
+var c = &cacheType{}
 
 // ConfigCache ConfigCache
 type cacheType struct {
@@ -47,17 +47,17 @@ func (conf *Config) CompatibleConfig() {
 		return
 	}
 	if len(dnsConf.DNS.Name) > 0 {
-		cache.Lock.Lock()
-		defer cache.Lock.Unlock()
+		c.Lock.Lock()
+		defer c.Lock.Unlock()
 		conf.DnsConf = append(conf.DnsConf, *dnsConf)
-		cache.ConfigSingle = conf
+		c.ConfigSingle = conf
 	}
 }
 
 // SaveConfig 保存配置
 func (conf *Config) SaveConfig() (err error) {
-	cache.Lock.Lock()
-	defer cache.Lock.Unlock()
+	c.Lock.Lock()
+	defer c.Lock.Unlock()
 
 	byt, err := yaml.Marshal(conf)
 	if err != nil {
@@ -75,47 +75,47 @@ func (conf *Config) SaveConfig() (err error) {
 	log.Printf("配置文件已保存在: %s\n", configFilePath)
 
 	// 清空配置缓存
-	cache.ConfigSingle = nil
+	c.ConfigSingle = nil
 
 	return
 }
 
 // GetConfigCached 获得缓存的配置
 func GetConfigCached() (conf Config, err error) {
-	cache.Lock.Lock()
-	defer cache.Lock.Unlock()
+	c.Lock.Lock()
+	defer c.Lock.Unlock()
 
-	if cache.ConfigSingle != nil {
-		return *cache.ConfigSingle, cache.Err
+	if c.ConfigSingle != nil {
+		return *c.ConfigSingle, c.Err
 	}
 
 	// init config
-	cache.ConfigSingle = &Config{}
+	c.ConfigSingle = &Config{}
 
 	configFilePath := GetConfigFilePath()
 	_, err = os.Stat(configFilePath)
 	if err != nil {
-		cache.Err = err
-		return *cache.ConfigSingle, err
+		c.Err = err
+		return *c.ConfigSingle, err
 	}
 
 	byt, err := os.ReadFile(configFilePath)
 	if err != nil {
 		log.Println(configFilePath + " 读取失败")
-		cache.Err = err
-		return *cache.ConfigSingle, err
+		c.Err = err
+		return *c.ConfigSingle, err
 	}
 
-	err = yaml.Unmarshal(byt, cache.ConfigSingle)
+	err = yaml.Unmarshal(byt, c.ConfigSingle)
 	if err != nil {
 		log.Println("反序列化配置文件失败", err)
-		cache.Err = err
-		return *cache.ConfigSingle, err
+		c.Err = err
+		return *c.ConfigSingle, err
 	}
 
 	// remove err
-	cache.Err = nil
-	return *cache.ConfigSingle, err
+	c.Err = nil
+	return *c.ConfigSingle, err
 }
 
 // GetConfigFilePath 获得配置文件路径
