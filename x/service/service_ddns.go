@@ -5,9 +5,9 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/ddns"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/x/hook"
-	"log"
 	"os"
 	"strings"
 	"sync/atomic"
@@ -22,20 +22,21 @@ type DDNSService struct {
 	ForceCompareGlobal bool
 	stop               chan chan struct{}
 	status             *int32 // status is the current timer status.
-	logger             *log.Logger
+	logger             logger.ILogger
 }
 
 func (s *DDNSService) String() string {
 	return s.DDNS.String()
 }
 
-func NewDDNS(d ddns.IDDNS) *DDNSService {
+func NewDDNS(d ddns.IDDNS, log logger.ILogger) *DDNSService {
 	st := consts.StatusRunning
 	s := &DDNSService{
 		DDNS:               d,
 		stop:               make(chan chan struct{}),
 		ForceCompareGlobal: true,
 		status:             &st,
+		logger:             log,
 	}
 
 	return s
@@ -137,7 +138,7 @@ func (s *DDNSService) waitForNetworkConnected() {
 				// 如果 err 包含回环地址（[::1]:53）则表示没有 DNS 服务器，设置 DNS 服务器
 				if strings.Contains(err.Error(), loopbackServer) && !find {
 					server := "1.1.1.1:53"
-					s.logger.Printf("解析回环地址 %s 失败！将默认使用 %s，可参考文档通过 -dns 自定义 DNS 服务器",
+					s.logger.Debugf("解析回环地址 %s 失败！将默认使用 %s，可参考文档通过 -dns 自定义 DNS 服务器",
 						loopbackServer, server)
 
 					_ = os.Setenv(util.DNSServerEnv, server)
@@ -145,7 +146,7 @@ func (s *DDNSService) waitForNetworkConnected() {
 					continue
 				}
 
-				s.logger.Printf("等待网络连接：%s。%s 后重试...", err, timeout)
+				s.logger.Debugf("等待网络连接：%s。%s 后重试...", err, timeout)
 				// 等待 5 秒后重试
 				time.Sleep(timeout)
 				continue

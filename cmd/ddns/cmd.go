@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/jxo-me/ddns/config"
 	"net/url"
-	"os"
 	"strings"
 )
 
@@ -49,15 +48,7 @@ func buildConfigFromCmd(services stringList) (*config.Config, error) {
 
 func buildServiceConfig(url *url.URL) (*config.DnsConfig, error) {
 
-	if v := os.Getenv("_GOST_ID"); v != "" {
-		namePrefix = fmt.Sprintf("ddns-%s@", v)
-	}
-
-	svc := &config.DnsConfig{
-		Addr: url.Host,
-	}
-
-	return svc, nil
+	return nil, nil
 }
 
 func normCmd(s string) (*url.URL, error) {

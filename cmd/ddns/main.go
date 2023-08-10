@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/judwhite/go-svc"
+	"github.com/jxo-me/ddns/core/logger"
+	xlogger "github.com/jxo-me/ddns/x/logger"
 	"log"
 	"os"
 	"runtime"
@@ -25,6 +27,7 @@ func init() {
 			version, runtime.Version(), runtime.GOOS, runtime.GOARCH)
 		os.Exit(0)
 	}
+	logger.SetDefault(xlogger.NewLogger())
 }
 
 func main() {

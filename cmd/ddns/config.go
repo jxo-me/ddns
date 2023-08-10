@@ -19,7 +19,7 @@ func buildService(cfg *config.Config) (services []service.IDDNSService) {
 	}
 	log := logger.Default()
 	for _, svcCfg := range cfg.Services {
-		svc, err := parsing.ParseService(svcCfg)
+		svc, err := parsing.ParseService(svcCfg, log)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -27,8 +27,8 @@ func buildService(cfg *config.Config) (services []service.IDDNSService) {
 			if err = app.Runtime.DDNSRegistry().Register(svcCfg.Name, svc); err != nil {
 				log.Fatal(err)
 			}
+			services = append(services, svc)
 		}
-		services = append(services, svc)
 	}
 
 	return

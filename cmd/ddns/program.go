@@ -19,12 +19,12 @@ func (p *program) Init(env svc.Environment) error {
 		}
 	}
 	// build config from command line
-	cmdCfg, err := buildConfigFromCmd(services)
-	if err != nil {
-		return err
-	}
-	// merge config
-	cfg = p.mergeConfig(cfg, cmdCfg)
+	//cmdCfg, err := buildConfigFromCmd(services)
+	//if err != nil {
+	//	return err
+	//}
+	//// merge config
+	//cfg = p.mergeConfig(cfg, cmdCfg)
 	// set default logger
 	logger.SetDefault(logFromConfig(cfg.Log))
 	// set default output format
@@ -44,7 +44,7 @@ func (p *program) Start() error {
 	for _, ddns := range buildService(cfg) {
 		srv := ddns
 		go func() {
-			_ = srv.Serve()
+			_ = srv.Start()
 		}()
 	}
 	return nil
@@ -52,7 +52,7 @@ func (p *program) Start() error {
 
 func (p *program) Stop() error {
 	for name, srv := range app.Runtime.DDNSRegistry().GetAll() {
-		_ = srv.Close()
+		_ = srv.Stop()
 		log.Default().Printf("service %s shutdown", name)
 	}
 	return nil
