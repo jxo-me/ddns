@@ -18,7 +18,7 @@ const (
 
 // NameCheap Domain
 type NameCheap struct {
-	DNS      config.DNS
+	DNS      *config.DNS
 	Domains  config.Domains
 	lastIpv4 string
 	lastIpv6 string
@@ -32,6 +32,10 @@ type NameCheapResp struct {
 
 func (nc *NameCheap) String() string {
 	return Code
+}
+
+func (nc *NameCheap) Endpoint() string {
+	return Endpoint
 }
 
 // Init 初始化

@@ -19,7 +19,7 @@ const (
 // Dnspod 腾讯云dns实现
 // https://cloud.tencent.com/document/api/302/8516
 type Dnspod struct {
-	DNS     config.DNS
+	DNS     *config.DNS
 	Domains config.Domains
 	TTL     string
 }
@@ -49,6 +49,10 @@ type DnspodStatus struct {
 
 func (dnspod *Dnspod) String() string {
 	return Code
+}
+
+func (dnspod *Dnspod) Endpoint() string {
+	return Endpoint
 }
 
 // Init 初始化

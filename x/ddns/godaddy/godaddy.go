@@ -27,7 +27,7 @@ type godaddyRecord struct {
 type godaddyRecords []godaddyRecord
 
 type GoDaddyDNS struct {
-	dns      config.DNS
+	dns      *config.DNS
 	domains  config.Domains
 	ttl      int
 	header   http.Header
@@ -38,6 +38,10 @@ type GoDaddyDNS struct {
 
 func (g *GoDaddyDNS) String() string {
 	return Code
+}
+
+func (g *GoDaddyDNS) Endpoint() string {
+	return ""
 }
 
 func (g *GoDaddyDNS) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {

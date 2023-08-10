@@ -2,7 +2,7 @@ package config
 
 // Webhook Webhook
 type Webhook struct {
-	WebhookURL         string
-	WebhookRequestBody string
-	WebhookHeaders     string
+	WebhookURL         string `json:"webhookURL"`
+	WebhookRequestBody string `json:"webhookRequestBody"`
+	WebhookHeaders     string `json:"webhookHeaders"`
 }

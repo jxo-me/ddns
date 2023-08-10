@@ -12,7 +12,7 @@ var (
 )
 
 type Application struct {
-	ddnsReg reg.IRegistry[service.IDDNS]
+	ddnsReg reg.IRegistry[service.IDDNSService]
 }
 
 func NewConfig() *Application {
@@ -23,6 +23,6 @@ func NewConfig() *Application {
 	return &a
 }
 
-func (a *Application) DDNSRegistry() reg.IRegistry[service.IDDNS] {
+func (a *Application) DDNSRegistry() reg.IRegistry[service.IDDNSService] {
 	return a.ddnsReg
 }

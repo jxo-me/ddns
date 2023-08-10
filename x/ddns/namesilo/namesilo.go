@@ -21,7 +21,7 @@ const (
 
 // NameSilo Domain
 type NameSilo struct {
-	DNS      config.DNS
+	DNS      *config.DNS
 	Domains  config.Domains
 	lastIpv4 string
 	lastIpv6 string
@@ -68,6 +68,10 @@ type ResourceRecord struct {
 
 func (ns *NameSilo) String() string {
 	return Code
+}
+
+func (ns *NameSilo) Endpoint() string {
+	return Endpoint
 }
 
 // Init 初始化

@@ -20,7 +20,7 @@ const (
 // GoogleDomain Google Domain
 // https://support.google.com/domains/answer/6147083?hl=zh-Hans#zippy=%2C使用-api-更新您的动态-dns-记录
 type GoogleDomain struct {
-	DNS      config.DNS
+	DNS      *config.DNS
 	Domains  config.Domains
 	lastIpv4 string
 	lastIpv6 string
@@ -30,6 +30,10 @@ type GoogleDomain struct {
 type GoogleDomainResp struct {
 	Status  string
 	SetedIP string
+}
+
+func (gd *GoogleDomain) Endpoint() string {
+	return Endpoint
 }
 
 // Init 初始化

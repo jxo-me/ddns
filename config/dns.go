@@ -20,34 +20,41 @@ var Ipv6Reg = regexp.MustCompile(`((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|
 // DNS DNS配置
 type DNS struct {
 	// 名称。如：alidns,webhook
-	Name   string
-	ID     string
-	Secret string
+	Name   string `json:"name"`
+	ID     string `json:"ID"`
+	Secret string `json:"secret"`
+}
+
+type Ipv4 struct {
+	Enable bool `json:"enable"`
+	// 获取IP类型 url/netInterface
+	GetType      string   `json:"getType"`
+	URL          string   `json:"url"`
+	NetInterface string   `json:"netInterface"`
+	Cmd          string   `json:"cmd"`
+	Domains      []string `json:"domains"`
+}
+
+type Ipv6 struct {
+	Enable bool `json:"enable"`
+	// 获取IP类型 url/netInterface
+	GetType      string `yaml:",omitempty" json:"getType"`
+	URL          string `yaml:",omitempty" json:"url"`
+	NetInterface string `yaml:",omitempty" json:"netInterface"`
+	Cmd          string `yaml:",omitempty" json:"cmd"`
+	// ipv6匹配正则表达式
+	IPv6Reg string   `yaml:",omitempty" json:"IPv6Reg"`
+	Domains []string `yaml:",omitempty" json:"domains"`
 }
 
 // DnsConfig 配置
 type DnsConfig struct {
-	Ipv4 struct {
-		Enable bool
-		// 获取IP类型 url/netInterface
-		GetType      string
-		URL          string
-		NetInterface string
-		Cmd          string
-		Domains      []string
-	}
-	Ipv6 struct {
-		Enable bool
-		// 获取IP类型 url/netInterface
-		GetType      string
-		URL          string
-		NetInterface string
-		Cmd          string
-		IPv6Reg      string // ipv6匹配正则表达式
-		Domains      []string
-	}
-	DNS DNS
-	TTL string
+	Name    string   `json:"name"`
+	Ipv4    *Ipv4    `yaml:",omitempty"  json:"ipv4"`
+	Ipv6    *Ipv6    `yaml:",omitempty" json:"ipv6"`
+	DNS     *DNS     `yaml:",omitempty" json:"dns"`
+	TTL     string   `yaml:",omitempty" json:"ttl"`
+	Webhook *Webhook `yaml:",omitempty" json:"webhook"`
 }
 
 func (conf *DnsConfig) getIpv4AddrFromInterface() string {

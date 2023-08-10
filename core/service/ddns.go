@@ -1,8 +1,7 @@
 package service
 
-import "time"
-
-type IDDNS interface {
-	RunTimer(delay time.Duration)
-	RunOnce()
+type IDDNSService interface {
+	String() string
+	Start() error
+	Stop() error
 }

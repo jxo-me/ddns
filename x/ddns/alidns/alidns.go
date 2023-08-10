@@ -16,10 +16,15 @@ const (
 	Code     string = "alidns"
 )
 
+type Config struct {
+	AccessKeyID     string `json:"accessKeyId"`
+	AccessKeySecret string `json:"accessKeySecret"`
+}
+
 // Alidns Alidns
 // https://help.aliyun.com/document_detail/29776.html?spm=a2c4g.11186623.6.672.715a45caji9dMA
 type Alidns struct {
-	DNS     config.DNS
+	DNS     *config.DNS
 	Domains config.Domains
 	TTL     string
 }
@@ -47,6 +52,10 @@ type AlidnsResp struct {
 
 func (ali *Alidns) String() string {
 	return Code
+}
+
+func (ali *Alidns) Endpoint() string {
+	return Endpoint
 }
 
 // Init 初始化

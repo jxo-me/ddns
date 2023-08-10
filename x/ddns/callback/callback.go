@@ -17,7 +17,7 @@ const (
 )
 
 type Callback struct {
-	DNS      config.DNS
+	DNS      *config.DNS
 	Domains  config.Domains
 	TTL      string
 	lastIpv4 string
@@ -26,6 +26,10 @@ type Callback struct {
 
 func (cb *Callback) String() string {
 	return Code
+}
+
+func (cb *Callback) Endpoint() string {
+	return ""
 }
 
 // Init 初始化

@@ -1,138 +1,95 @@
 package config
 
 import (
+	"encoding/json"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
-	"log"
-	"os"
+	"io"
 	"sync"
 )
 
-const ConfigFilePathENV = "DDNS_CONFIG_FILE_PATH"
+var (
+	v = viper.GetViper()
+)
 
-var c = &cacheType{}
-
-// ConfigCache ConfigCache
-type cacheType struct {
-	ConfigSingle *Config
-	Err          error
-	Lock         sync.Mutex
+func init() {
+	v.SetConfigName("config")
+	v.AddConfigPath("/etc/ddns/")
+	v.AddConfigPath("$HOME/.ddns/")
+	v.AddConfigPath(".")
 }
+
+var (
+	global    = &Config{}
+	globalMux sync.RWMutex
+)
 
 type Config struct {
-	DnsConf []DnsConfig
-	Webhook
-	// 禁止公网访问
-	NotAllowWanAccess bool
+	Services []*DnsConfig `json:"services"`
+	Log      *LogConfig   `yaml:",omitempty" json:"log,omitempty"`
 }
 
-// CompatibleConfig 兼容v5.0.0之前的配置文件
-func (conf *Config) CompatibleConfig() {
-	if len(conf.DnsConf) > 0 {
-		return
-	}
+func Global() *Config {
+	globalMux.RLock()
+	defer globalMux.RUnlock()
 
-	configFilePath := GetConfigFilePath()
-	_, err := os.Stat(configFilePath)
-	if err != nil {
-		return
-	}
-	byt, err := os.ReadFile(configFilePath)
-	if err != nil {
-		return
-	}
-
-	dnsConf := &DnsConfig{}
-	err = yaml.Unmarshal(byt, dnsConf)
-	if err != nil {
-		return
-	}
-	if len(dnsConf.DNS.Name) > 0 {
-		c.Lock.Lock()
-		defer c.Lock.Unlock()
-		conf.DnsConf = append(conf.DnsConf, *dnsConf)
-		c.ConfigSingle = conf
-	}
+	cfg := &Config{}
+	*cfg = *global
+	return cfg
 }
 
-// SaveConfig 保存配置
-func (conf *Config) SaveConfig() (err error) {
-	c.Lock.Lock()
-	defer c.Lock.Unlock()
+func Set(c *Config) {
+	globalMux.Lock()
+	defer globalMux.Unlock()
 
-	byt, err := yaml.Marshal(conf)
-	if err != nil {
-		log.Println(err)
+	global = c
+}
+
+func OnUpdate(f func(c *Config) error) error {
+	globalMux.Lock()
+	defer globalMux.Unlock()
+
+	return f(global)
+}
+
+func (c *Config) Load() error {
+	if err := v.ReadInConfig(); err != nil {
 		return err
 	}
 
-	configFilePath := GetConfigFilePath()
-	err = os.WriteFile(configFilePath, byt, 0600)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	log.Printf("配置文件已保存在: %s\n", configFilePath)
-
-	// 清空配置缓存
-	c.ConfigSingle = nil
-
-	return
+	return v.Unmarshal(c)
 }
 
-// GetConfigCached 获得缓存的配置
-func GetConfigCached() (conf Config, err error) {
-	c.Lock.Lock()
-	defer c.Lock.Unlock()
-
-	if c.ConfigSingle != nil {
-		return *c.ConfigSingle, c.Err
+func (c *Config) Read(r io.Reader) error {
+	if err := v.ReadConfig(r); err != nil {
+		return err
 	}
 
-	// init config
-	c.ConfigSingle = &Config{}
-
-	configFilePath := GetConfigFilePath()
-	_, err = os.Stat(configFilePath)
-	if err != nil {
-		c.Err = err
-		return *c.ConfigSingle, err
-	}
-
-	byt, err := os.ReadFile(configFilePath)
-	if err != nil {
-		log.Println(configFilePath + " 读取失败")
-		c.Err = err
-		return *c.ConfigSingle, err
-	}
-
-	err = yaml.Unmarshal(byt, c.ConfigSingle)
-	if err != nil {
-		log.Println("反序列化配置文件失败", err)
-		c.Err = err
-		return *c.ConfigSingle, err
-	}
-
-	// remove err
-	c.Err = nil
-	return *c.ConfigSingle, err
+	return v.Unmarshal(c)
 }
 
-// GetConfigFilePath 获得配置文件路径
-func GetConfigFilePath() string {
-	configFilePath := os.Getenv(ConfigFilePathENV)
-	if configFilePath != "" {
-		return configFilePath
+func (c *Config) ReadFile(file string) error {
+	v.SetConfigFile(file)
+	if err := v.ReadInConfig(); err != nil {
+		return err
 	}
-	return GetConfigFilePathDefault()
+	return v.Unmarshal(c)
 }
 
-// GetConfigFilePathDefault 获得默认的配置文件路径
-func GetConfigFilePathDefault() string {
-	dir, err := os.UserHomeDir()
-	if err != nil {
-		// log.Println("Getting Home directory failed: ", err)
-		return "../.ddns_go_config.yaml"
+func (c *Config) Write(w io.Writer, format string) error {
+	switch format {
+	case "json":
+		enc := json.NewEncoder(w)
+		enc.SetIndent("", "  ")
+		enc.Encode(c)
+		return nil
+	case "yaml":
+		fallthrough
+	default:
+		enc := yaml.NewEncoder(w)
+		defer enc.Close()
+		enc.SetIndent(2)
+
+		return enc.Encode(c)
 	}
-	return dir + string(os.PathSeparator) + ".ddns_go_config.yaml"
 }

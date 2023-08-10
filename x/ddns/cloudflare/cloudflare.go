@@ -20,7 +20,7 @@ const (
 
 // Cloudflare Cloudflare实现
 type Cloudflare struct {
-	DNS     config.DNS
+	DNS     *config.DNS
 	Domains config.Domains
 	TTL     int
 }
@@ -60,6 +60,10 @@ type CloudflareStatus struct {
 
 func (cf *Cloudflare) String() string {
 	return Code
+}
+
+func (cf *Cloudflare) Endpoint() string {
+	return Endpoint
 }
 
 // Init 初始化

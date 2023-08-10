@@ -21,7 +21,7 @@ const (
 // Huaweicloud Huaweicloud
 // https://support.huaweicloud.com/api-dns/dns_api_64001.html
 type Huaweicloud struct {
-	DNS     config.DNS
+	DNS     *config.DNS
 	Domains config.Domains
 	TTL     int
 }
@@ -53,6 +53,10 @@ type HuaweicloudRecordsets struct {
 
 func (hw *Huaweicloud) String() string {
 	return Code
+}
+
+func (hw *Huaweicloud) Endpoint() string {
+	return Endpoint
 }
 
 // Init 初始化

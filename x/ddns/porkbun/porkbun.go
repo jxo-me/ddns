@@ -18,7 +18,7 @@ const (
 )
 
 type Porkbun struct {
-	DNSConfig config.DNS
+	DNSConfig *config.DNS
 	Domains   config.Domains
 	TTL       string
 }
@@ -50,6 +50,10 @@ type PorkbunDomainCreateOrUpdateVO struct {
 
 func (pb *Porkbun) String() string {
 	return Code
+}
+
+func (pb *Porkbun) Endpoint() string {
+	return Endpoint
 }
 
 // Init 初始化

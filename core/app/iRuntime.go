@@ -6,5 +6,5 @@ import (
 )
 
 type IRuntime interface {
-	DDNSRegistry() reg.IRegistry[service.IDDNS]
+	DDNSRegistry() reg.IRegistry[service.IDDNSService]
 }

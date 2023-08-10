@@ -20,7 +20,7 @@ const (
 )
 
 type BaiduCloud struct {
-	DNS     config.DNS
+	DNS     *config.DNS
 	Domains config.Domains
 	TTL     int
 }
@@ -72,6 +72,10 @@ type BaiduCreateRequest struct {
 
 func (baidu *BaiduCloud) String() string {
 	return Code
+}
+
+func (baidu *BaiduCloud) Endpoint() string {
+	return Endpoint
 }
 
 func (baidu *BaiduCloud) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
