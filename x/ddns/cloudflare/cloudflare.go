@@ -14,9 +14,8 @@ import (
 )
 
 const (
-	zonesAPI string = "https://api.cloudflare.com/client/v4/zones"
-	// CloudFlareCode code
-	CloudFlareCode string = "cloudflare"
+	Endpoint string = "https://api.cloudflare.com/client/v4/zones"
+	Code     string = "cloudflare"
 )
 
 // Cloudflare Cloudflare实现
@@ -60,7 +59,7 @@ type CloudflareStatus struct {
 }
 
 func (cf *Cloudflare) String() string {
-	return CloudFlareCode
+	return Code
 }
 
 // Init 初始化
@@ -109,7 +108,7 @@ func (cf *Cloudflare) addUpdateDomainRecords(recordType string) {
 		// getDomains 最多更新前50条
 		err = cf.request(
 			"GET",
-			fmt.Sprintf(zonesAPI+"/%s/dns_records?type=%s&name=%s&per_page=50", zoneID, recordType, domain),
+			fmt.Sprintf(Endpoint+"/%s/dns_records?type=%s&name=%s&per_page=50", zoneID, recordType, domain),
 			nil,
 			&records,
 		)
@@ -141,7 +140,7 @@ func (cf *Cloudflare) create(zoneID string, domain *config.Domain, recordType st
 	var status CloudflareStatus
 	err := cf.request(
 		"POST",
-		fmt.Sprintf(zonesAPI+"/%s/dns_records", zoneID),
+		fmt.Sprintf(Endpoint+"/%s/dns_records", zoneID),
 		record,
 		&status,
 	)
@@ -171,7 +170,7 @@ func (cf *Cloudflare) modify(result CloudflareRecordsResp, zoneID string, domain
 		}
 		err := cf.request(
 			"PUT",
-			fmt.Sprintf(zonesAPI+"/%s/dns_records/%s", zoneID, record.ID),
+			fmt.Sprintf(Endpoint+"/%s/dns_records/%s", zoneID, record.ID),
 			record,
 			&status,
 		)
@@ -189,7 +188,7 @@ func (cf *Cloudflare) modify(result CloudflareRecordsResp, zoneID string, domain
 func (cf *Cloudflare) getZones(domain *config.Domain) (result CloudflareZonesResp, err error) {
 	err = cf.request(
 		"GET",
-		fmt.Sprintf(zonesAPI+"?name=%s&status=%s&per_page=%s", domain.DomainName, "active", "50"),
+		fmt.Sprintf(Endpoint+"?name=%s&status=%s&per_page=%s", domain.DomainName, "active", "50"),
 		nil,
 		&result,
 	)

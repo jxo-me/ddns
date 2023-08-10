@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	huaweicloudEndpoint string = "https://dns.myhuaweicloud.com"
-	HuaweicloudCode     string = "huaweicloud"
+	Endpoint string = "https://dns.myhuaweicloud.com"
+	Code     string = "huaweicloud"
 )
 
 // Huaweicloud Huaweicloud
@@ -52,7 +52,7 @@ type HuaweicloudRecordsets struct {
 }
 
 func (hw *Huaweicloud) String() string {
-	return HuaweicloudCode
+	return Code
 }
 
 // Init 初始化
@@ -94,7 +94,7 @@ func (hw *Huaweicloud) addUpdateDomainRecords(recordType string) {
 
 		err := hw.request(
 			"GET",
-			fmt.Sprintf(huaweicloudEndpoint+"/v2/recordsets?type=%s&name=%s", recordType, domain),
+			fmt.Sprintf(Endpoint+"/v2/recordsets?type=%s&name=%s", recordType, domain),
 			nil,
 			&records,
 		)
@@ -151,7 +151,7 @@ func (hw *Huaweicloud) create(domain *config.Domain, recordType string, ipAddr s
 	var result HuaweicloudRecordsets
 	err = hw.request(
 		"POST",
-		fmt.Sprintf(huaweicloudEndpoint+"/v2/zones/%s/recordsets", zoneID),
+		fmt.Sprintf(Endpoint+"/v2/zones/%s/recordsets", zoneID),
 		record,
 		&result,
 	)
@@ -181,7 +181,7 @@ func (hw *Huaweicloud) modify(record HuaweicloudRecordsets, domain *config.Domai
 
 	err := hw.request(
 		"PUT",
-		fmt.Sprintf(huaweicloudEndpoint+"/v2/zones/%s/recordsets/%s", record.ZoneID, record.ID),
+		fmt.Sprintf(Endpoint+"/v2/zones/%s/recordsets/%s", record.ZoneID, record.ID),
 		&request,
 		&result,
 	)
@@ -199,7 +199,7 @@ func (hw *Huaweicloud) modify(record HuaweicloudRecordsets, domain *config.Domai
 func (hw *Huaweicloud) getZones(domain *config.Domain) (result HuaweicloudZonesResp, err error) {
 	err = hw.request(
 		"GET",
-		fmt.Sprintf(huaweicloudEndpoint+"/v2/zones?name=%s", domain.DomainName),
+		fmt.Sprintf(Endpoint+"/v2/zones?name=%s", domain.DomainName),
 		nil,
 		&result,
 	)

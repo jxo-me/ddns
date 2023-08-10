@@ -15,8 +15,8 @@ import (
 // https://cloud.baidu.com/doc/BCD/s/4jwvymhs7
 
 const (
-	baiduEndpoint = "https://bcd.baidubce.com"
-	BaiduCode     = "baidu"
+	Endpoint = "https://bcd.baidubce.com"
+	Code     = "baidu"
 )
 
 type BaiduCloud struct {
@@ -71,7 +71,7 @@ type BaiduCreateRequest struct {
 }
 
 func (baidu *BaiduCloud) String() string {
-	return BaiduCode
+	return Code
 }
 
 func (baidu *BaiduCloud) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
@@ -114,7 +114,7 @@ func (baidu *BaiduCloud) addUpdateDomainRecords(recordType string) {
 			PageSize: 1000,
 		}
 
-		err := baidu.request("POST", baiduEndpoint+"/v1/domain/resolve/list", requestBody, &records)
+		err := baidu.request("POST", Endpoint+"/v1/domain/resolve/list", requestBody, &records)
 		if err != nil {
 			domain.UpdateStatus = consts.UpdatedFailed
 			return
@@ -147,7 +147,7 @@ func (baidu *BaiduCloud) create(domain *config.Domain, recordType string, ipAddr
 	}
 	var result BaiduRecordsResp
 
-	err := baidu.request("POST", baiduEndpoint+"/v1/domain/resolve/add", baiduCreateRequest, &result)
+	err := baidu.request("POST", Endpoint+"/v1/domain/resolve/add", baiduCreateRequest, &result)
 	if err == nil {
 		log.Printf("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
@@ -175,7 +175,7 @@ func (baidu *BaiduCloud) modify(record BaiduRecord, domain *config.Domain, rdTyp
 	}
 	var result BaiduRecordsResp
 
-	err := baidu.request("POST", baiduEndpoint+"/v1/domain/resolve/edit", baiduModifyRequest, &result)
+	err := baidu.request("POST", Endpoint+"/v1/domain/resolve/edit", baiduModifyRequest, &result)
 	if err == nil {
 		log.Printf("更新域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess

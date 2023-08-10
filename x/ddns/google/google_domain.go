@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	googleDomainEndpoint string = "https://domains.google.com/nic/update"
-	GoogleDomainCode     string = "google"
+	Endpoint string = "https://domains.google.com/nic/update"
+	Code     string = "google"
 )
 
 // GoogleDomain Google Domain
@@ -73,7 +73,7 @@ func (gd *GoogleDomain) addUpdateDomainRecords(recordType string) {
 }
 
 func (gd *GoogleDomain) String() string {
-	return GoogleDomainCode
+	return Code
 }
 
 // 修改
@@ -108,7 +108,7 @@ func (gd *GoogleDomain) request(params url.Values, result *GoogleDomainResp) (er
 
 	req, err := http.NewRequest(
 		http.MethodPost,
-		googleDomainEndpoint,
+		Endpoint,
 		http.NoBody,
 	)
 

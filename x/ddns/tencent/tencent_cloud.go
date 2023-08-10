@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	tencentCloudEndPoint = "https://dnspod.tencentcloudapi.com"
-	tencentCloudVersion  = "2021-03-23"
-	TencentCloudCode     = "tencent"
+	EndPoint            = "https://dnspod.tencentcloudapi.com"
+	tencentCloudVersion = "2021-03-23"
+	Code                = "tencent"
 )
 
 // TencentCloud 腾讯云 DNSPod API 3.0 实现
@@ -67,7 +67,7 @@ type TencentCloudStatus struct {
 }
 
 func (tc *TencentCloud) String() string {
-	return TencentCloudCode
+	return Code
 }
 
 func (tc *TencentCloud) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
@@ -220,7 +220,7 @@ func (tc *TencentCloud) request(action string, data interface{}, result interfac
 	}
 	req, err := http.NewRequest(
 		"POST",
-		tencentCloudEndPoint,
+		EndPoint,
 		bytes.NewBuffer(jsonStr),
 	)
 	if err != nil {
@@ -235,7 +235,7 @@ func (tc *TencentCloud) request(action string, data interface{}, result interfac
 
 	client := util.CreateHTTPClient()
 	resp, err := client.Do(req)
-	err = util.GetHTTPResponse(resp, tencentCloudEndPoint, err, result)
+	err = util.GetHTTPResponse(resp, EndPoint, err, result)
 
 	return
 }

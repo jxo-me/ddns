@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	GoDaddyDNSCode string = "godaddy"
+	Code string = "godaddy"
 )
 
 type godaddyRecord struct {
@@ -37,7 +37,7 @@ type GoDaddyDNS struct {
 }
 
 func (g *GoDaddyDNS) String() string {
-	return GoDaddyDNSCode
+	return Code
 }
 
 func (g *GoDaddyDNS) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {

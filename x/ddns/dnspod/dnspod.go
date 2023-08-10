@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	recordListAPI   string = "https://dnsapi.cn/Record.List"
+	Endpoint        string = "https://dnsapi.cn/Record.List"
 	recordModifyURL string = "https://dnsapi.cn/Record.Modify"
 	recordCreateAPI string = "https://dnsapi.cn/Record.Create"
-	DnspodCode      string = "dnspod"
+	Code            string = "dnspod"
 )
 
 // Dnspod 腾讯云dns实现
@@ -48,7 +48,7 @@ type DnspodStatus struct {
 }
 
 func (dnspod *Dnspod) String() string {
-	return DnspodCode
+	return Code
 }
 
 // Init 初始化
@@ -188,11 +188,11 @@ func (dnspod *Dnspod) getRecordList(domain *config.Domain, typ string) (result D
 
 	client := util.CreateHTTPClient()
 	resp, err := client.PostForm(
-		recordListAPI,
+		Endpoint,
 		params,
 	)
 
-	err = util.GetHTTPResponse(resp, recordListAPI, err, &result)
+	err = util.GetHTTPResponse(resp, Endpoint, err, &result)
 
 	return
 }

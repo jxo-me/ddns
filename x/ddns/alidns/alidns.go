@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	alidnsEndpoint string = "https://alidns.aliyuncs.com/"
-	AliDnsCode     string = "alidns"
+	Endpoint string = "https://alidns.aliyuncs.com/"
+	Code     string = "alidns"
 )
 
 // Alidns Alidns
@@ -46,7 +46,7 @@ type AlidnsResp struct {
 }
 
 func (ali *Alidns) String() string {
-	return AliDnsCode
+	return Code
 }
 
 // Init 初始化
@@ -170,7 +170,7 @@ func (ali *Alidns) request(params url.Values, result interface{}) (err error) {
 
 	req, err := http.NewRequest(
 		"GET",
-		alidnsEndpoint,
+		Endpoint,
 		bytes.NewBuffer(nil),
 	)
 	req.URL.RawQuery = params.Encode()
@@ -182,7 +182,7 @@ func (ali *Alidns) request(params url.Values, result interface{}) (err error) {
 
 	client := util.CreateHTTPClient()
 	resp, err := client.Do(req)
-	err = util.GetHTTPResponse(resp, alidnsEndpoint, err, result)
+	err = util.GetHTTPResponse(resp, Endpoint, err, result)
 
 	return
 }

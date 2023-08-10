@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	porkbunEndpoint string = "https://porkbun.com/api/json/v3/dns"
-	PorkbunCode     string = "porkbun"
+	Endpoint string = "https://porkbun.com/api/json/v3/dns"
+	Code     string = "porkbun"
 )
 
 type Porkbun struct {
@@ -49,7 +49,7 @@ type PorkbunDomainCreateOrUpdateVO struct {
 }
 
 func (pb *Porkbun) String() string {
-	return PorkbunCode
+	return Code
 }
 
 // Init 初始化
@@ -84,7 +84,7 @@ func (pb *Porkbun) addUpdateDomainRecords(recordType string) {
 		var record PorkbunDomainQueryResponse
 		// 获取当前域名信息
 		err := pb.request(
-			porkbunEndpoint+fmt.Sprintf("/retrieveByNameType/%s/%s/%s", domain.DomainName, recordType, domain.SubDomain),
+			Endpoint+fmt.Sprintf("/retrieveByNameType/%s/%s/%s", domain.DomainName, recordType, domain.SubDomain),
 			&PorkbunApiKey{
 				AccessKey: pb.DNSConfig.ID,
 				SecretKey: pb.DNSConfig.Secret,
@@ -116,7 +116,7 @@ func (pb *Porkbun) create(domain *config.Domain, recordType *string, ipAddr *str
 	var response PorkbunResponse
 
 	err := pb.request(
-		porkbunEndpoint+fmt.Sprintf("/create/%s", domain.DomainName),
+		Endpoint+fmt.Sprintf("/create/%s", domain.DomainName),
 		&PorkbunDomainCreateOrUpdateVO{
 			PorkbunApiKey: &PorkbunApiKey{
 				AccessKey: pb.DNSConfig.ID,
@@ -153,7 +153,7 @@ func (pb *Porkbun) modify(record *PorkbunDomainQueryResponse, domain *config.Dom
 	var response PorkbunResponse
 
 	err := pb.request(
-		porkbunEndpoint+fmt.Sprintf("/editByNameType/%s/%s/%s", domain.DomainName, *recordType, domain.SubDomain),
+		Endpoint+fmt.Sprintf("/editByNameType/%s/%s/%s", domain.DomainName, *recordType, domain.SubDomain),
 		&PorkbunDomainCreateOrUpdateVO{
 			PorkbunApiKey: &PorkbunApiKey{
 				AccessKey: pb.DNSConfig.ID,

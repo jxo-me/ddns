@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	CallbackCode = "callback"
+	Code = "callback"
 )
 
 type Callback struct {
@@ -25,7 +25,7 @@ type Callback struct {
 }
 
 func (cb *Callback) String() string {
-	return CallbackCode
+	return Code
 }
 
 // Init 初始化

@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	nameSiloListRecordEndpoint   = "https://www.namesilo.com/api/dnsListRecords?version=1&type=xml&key=#{password}&domain=#{domain}"
+	Endpoint                     = "https://www.namesilo.com/api/dnsListRecords?version=1&type=xml&key=#{password}&domain=#{domain}"
 	nameSiloAddRecordEndpoint    = "https://www.namesilo.com/api/dnsAddRecord?version=1&type=xml&key=#{password}&domain=#{domain}&rrhost=#{host}&rrtype=#{recordType}&rrvalue=#{ip}&rrttl=3600"
 	nameSiloUpdateRecordEndpoint = "https://www.namesilo.com/api/dnsUpdateRecord?version=1&type=xml&key=#{password}&domain=#{domain}&rrhost=#{host}&rrid=#{recordID}&rrvalue=#{ip}&rrttl=3600"
-	NameSiloCode                 = "namesilo"
+	Code                         = "namesilo"
 )
 
 // NameSilo Domain
@@ -67,7 +67,7 @@ type ResourceRecord struct {
 }
 
 func (ns *NameSilo) String() string {
-	return NameSiloCode
+	return Code
 }
 
 // Init 初始化
@@ -153,7 +153,7 @@ func (ns *NameSilo) modify(domain *config.Domain, recordID, recordType, ipAddr s
 }
 
 func (ns *NameSilo) listRecords(domain *config.Domain) (resp NameSiloDNSListRecordResp, err error) {
-	result, err := ns.request("", domain, "", "", nameSiloListRecordEndpoint)
+	result, err := ns.request("", domain, "", "", Endpoint)
 	err = xml.Unmarshal([]byte(result), &resp)
 	return
 }

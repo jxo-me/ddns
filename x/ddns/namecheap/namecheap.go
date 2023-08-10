@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	nameCheapEndpoint string = "https://dynamicdns.park-your-domain.com/update?host=#{host}&domain=#{domain}&password=#{password}&ip=#{ip}"
-	NameCheapCode     string = "namecheap"
+	Endpoint string = "https://dynamicdns.park-your-domain.com/update?host=#{host}&domain=#{domain}&password=#{password}&ip=#{ip}"
+	Code     string = "namecheap"
 )
 
 // NameCheap Domain
@@ -31,7 +31,7 @@ type NameCheapResp struct {
 }
 
 func (nc *NameCheap) String() string {
-	return NameCheapCode
+	return Code
 }
 
 // Init 初始化
@@ -103,7 +103,7 @@ func (nc *NameCheap) modify(domain *config.Domain, recordType string, ipAddr str
 
 // request 统一请求接口
 func (nc *NameCheap) request(result *NameCheapResp, ipAddr string, domain *config.Domain) (err error) {
-	var url string = nameCheapEndpoint
+	var url string = Endpoint
 	url = strings.ReplaceAll(url, "#{host}", domain.GetSubDomain())
 	url = strings.ReplaceAll(url, "#{domain}", domain.DomainName)
 	url = strings.ReplaceAll(url, "#{password}", nc.DNS.Secret)
