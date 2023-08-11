@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/config/parsing"
 	"github.com/jxo-me/ddns/core/logger"
@@ -17,6 +18,7 @@ func buildService(cfg *config.Config) (services []service.IDDNSService) {
 	if cfg == nil {
 		return
 	}
+	fmt.Println("config", cfg)
 	log := logger.Default()
 	for _, svcCfg := range cfg.Services {
 		svc, err := parsing.ParseService(svcCfg, log)
@@ -30,7 +32,8 @@ func buildService(cfg *config.Config) (services []service.IDDNSService) {
 			services = append(services, svc)
 		}
 	}
-
+	fmt.Println("build services success", services)
+	log.Debug("build services success", services)
 	return
 }
 

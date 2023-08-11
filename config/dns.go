@@ -28,7 +28,7 @@ type DNS struct {
 type Ipv4 struct {
 	Enable bool `json:"enable"`
 	// 获取IP类型 url/netInterface
-	GetType      string   `json:"getType"`
+	GetType      string   `json:"getType"` // url/netInterface/cmd
 	URL          string   `json:"url"`
 	NetInterface string   `json:"netInterface"`
 	Cmd          string   `json:"cmd"`

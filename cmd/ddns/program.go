@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/judwhite/go-svc"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/core/logger"
@@ -44,9 +45,11 @@ func (p *program) Start() error {
 	for _, ddns := range buildService(cfg) {
 		srv := ddns
 		go func() {
+			fmt.Println("service " + srv.String() + " start")
 			_ = srv.Start()
 		}()
 	}
+	fmt.Println("service start success")
 	return nil
 }
 
