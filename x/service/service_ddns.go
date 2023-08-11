@@ -67,50 +67,13 @@ func (s *DDNSService) RunOnce() {
 	s.ForceCompareGlobal = false
 }
 
-func (s *DDNSService) Loop(confirm chan struct{}) {
-	go func(stop chan struct{}) {
-		var (
-			timerIntervalTicker = time.NewTicker(s.Delay)
-		)
-		defer timerIntervalTicker.Stop()
-		fmt.Println("DDNS 服务已启动，等待下次执行...")
-		for {
-			select {
-			case <-timerIntervalTicker.C:
-				// Check the timer status.
-				switch atomic.LoadInt32(s.status) {
-				case consts.StatusRunning:
-					fmt.Println("DDNS 服务正在执行...")
-					// Timer proceeding.
-					st := consts.StatusRunning
-					s.status = &st
-					s.RunOnce()
-					close(stop)
-				case consts.StatusStopped:
-					// Do nothing.
-				case consts.StatusClosed:
-					// Timer exits.
-					return
-				}
-			}
-		}
-	}(confirm)
-}
-
 func (s *DDNSService) Start() error {
-	fmt.Println("正在初始化 DDNS 服务...")
 	// 等待网络连接
 	s.waitForNetworkConnected()
-	fmt.Println("网络已连接，开始执行 DDNS 任务...")
-	stop := make(chan struct{})
-	stopConfirm := make(chan struct{})
-	//s.Loop(stopConfirm)
-	fmt.Println("DDNS 服务已启动！")
 	var (
 		timerIntervalTicker = time.NewTicker(s.Delay)
 	)
 	defer timerIntervalTicker.Stop()
-	fmt.Println("DDNS 服务已启动，等待下次执行...")
 	for {
 		select {
 		case <-timerIntervalTicker.C:
@@ -118,10 +81,7 @@ func (s *DDNSService) Start() error {
 			// Check the timer status.
 			switch atomic.LoadInt32(s.status) {
 			case consts.StatusRunning:
-				fmt.Println("DDNS StatusRunning 服务正在执行...")
 				// Timer proceeding.
-				st := consts.StatusRunning
-				s.status = &st
 				s.RunOnce()
 			case consts.StatusStopped:
 				fmt.Println("DDNS 服务已暂停！")
@@ -132,9 +92,8 @@ func (s *DDNSService) Start() error {
 			}
 		// call to stop polling
 		case confirm := <-s.stop:
-			close(stop)
-			<-stopConfirm
 			close(confirm)
+			fmt.Println("DDNS 服务已停止！")
 			return nil
 		}
 	}
@@ -145,7 +104,6 @@ func (s *DDNSService) Stop() error {
 	s.status = &st
 	confirm := make(chan struct{})
 	s.stop <- confirm
-	<-confirm
 
 	return nil
 }

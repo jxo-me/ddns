@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"github.com/judwhite/go-svc"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/x/app"
-	"log"
 	"os"
 )
 
@@ -45,18 +43,18 @@ func (p *program) Start() error {
 	for _, ddns := range buildService(cfg) {
 		srv := ddns
 		go func() {
-			fmt.Println("service " + srv.String() + " start")
+			logger.Default().Info("service " + srv.String() + " start")
 			_ = srv.Start()
 		}()
 	}
-	fmt.Println("service start success")
 	return nil
 }
 
 func (p *program) Stop() error {
+	log := logger.Default()
 	for name, srv := range app.Runtime.DDNSRegistry().GetAll() {
 		_ = srv.Stop()
-		log.Default().Printf("service %s shutdown", name)
+		log.Debugf("service %s shutdown", name)
 	}
 	return nil
 }
