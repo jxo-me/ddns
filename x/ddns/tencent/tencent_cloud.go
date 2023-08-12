@@ -74,7 +74,7 @@ func (tc *TencentCloud) Endpoint() string {
 	return Endpoint
 }
 
-func (tc *TencentCloud) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (tc *TencentCloud) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
 	tc.Domains.Ipv4Cache = ipv4cache
 	tc.Domains.Ipv6Cache = ipv6cache
 	tc.DNS = dnsConf.DNS

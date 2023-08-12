@@ -39,7 +39,7 @@ var (
 	}
 )
 
-func ParseService(cfg *config.DnsConfig, log logger.ILogger) (service.IDDNSService, error) {
+func ParseService(cfg *config.DDnsConfig, log logger.ILogger) (service.IDDNSService, error) {
 	var dns ddns.IDDNS
 	for name, iddns := range DDNS {
 		if cfg.Name == name {

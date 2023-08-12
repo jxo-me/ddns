@@ -78,7 +78,7 @@ func (baidu *BaiduCloud) Endpoint() string {
 	return Endpoint
 }
 
-func (baidu *BaiduCloud) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (baidu *BaiduCloud) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
 	baidu.Domains.Ipv4Cache = ipv4cache
 	baidu.Domains.Ipv6Cache = ipv6cache
 	baidu.DNS = dnsConf.DNS

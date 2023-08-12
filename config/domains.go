@@ -22,7 +22,7 @@ type Domains struct {
 }
 
 // GetNewIp 接口/网卡/命令获得 ip 并校验用户输入的域名
-func (domains *Domains) GetNewIp(dnsConf *DnsConfig) {
+func (domains *Domains) GetNewIp(dnsConf *DDnsConfig) {
 	domains.Ipv4Domains = checkParseDomains(dnsConf.Ipv4.Domains)
 	domains.Ipv6Domains = checkParseDomains(dnsConf.Ipv6.Domains)
 
@@ -38,7 +38,7 @@ func (domains *Domains) GetNewIp(dnsConf *DnsConfig) {
 			if domains.Ipv4Cache.TimesFailedIP == 3 {
 				domains.Ipv4Domains[0].UpdateStatus = consts.UpdatedFailed
 			}
-			log.Println("未能获取IPv4地址, 将不会更新")
+			log.Println("Failed to obtain IPv4 address, will not update")
 		}
 	}
 
@@ -54,7 +54,7 @@ func (domains *Domains) GetNewIp(dnsConf *DnsConfig) {
 			if domains.Ipv6Cache.TimesFailedIP == 3 {
 				domains.Ipv6Domains[0].UpdateStatus = consts.UpdatedFailed
 			}
-			log.Println("未能获取IPv6地址, 将不会更新")
+			log.Println("Failed to obtain IPv6 address, will not update")
 		}
 	}
 
@@ -73,7 +73,7 @@ func checkParseDomains(domainArr []string) (domains []*Domain) {
 				sp := strings.Split(domainStr, ".")
 				length := len(sp)
 				if length <= 1 {
-					log.Println(domainStr, "域名不正确")
+					log.Println(domainStr, "Incorrect domain name")
 					continue
 				}
 				// 处理域名
@@ -101,13 +101,13 @@ func checkParseDomains(domainArr []string) (domains []*Domain) {
 				sp := strings.Split(dp[1], ".")
 				length := len(sp)
 				if length <= 1 {
-					log.Println(domainStr, "域名不正确")
+					log.Println(domainStr, "Incorrect domain name")
 					continue
 				}
 				domain.DomainName = dp[1]
 				domain.SubDomain = dp[0]
 			} else {
-				log.Println(domainStr, "域名不正确")
+				log.Println(domainStr, "Incorrect domain name")
 				continue
 			}
 
@@ -115,7 +115,7 @@ func checkParseDomains(domainArr []string) (domains []*Domain) {
 			if strings.Contains(domain.DomainName, "?") {
 				u, err := url.Parse("http://" + domain.DomainName)
 				if err != nil {
-					log.Println(domainStr, "域名解析失败")
+					log.Println(domainStr, "domain name resolution failed")
 					continue
 				}
 				domain.DomainName = u.Host
@@ -133,7 +133,7 @@ func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDom
 		if domains.Ipv6Cache.Check(domains.Ipv6Addr) {
 			return domains.Ipv6Addr, domains.Ipv6Domains
 		} else {
-			log.Printf("IPv6未改变，将等待 %d 次后与DNS服务商进行比对\n", domains.Ipv6Cache.Times)
+			log.Printf("IPv6 has not changed, will wait %d times before comparing with DNS service provider\n", domains.Ipv6Cache.Times)
 			return "", domains.Ipv6Domains
 		}
 	}
@@ -141,7 +141,7 @@ func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDom
 	if domains.Ipv4Cache.Check(domains.Ipv4Addr) {
 		return domains.Ipv4Addr, domains.Ipv4Domains
 	} else {
-		log.Printf("IPv4未改变，将等待 %d 次后与DNS服务商进行比对\n", domains.Ipv4Cache.Times)
+		log.Printf("IPv4 has not changed, will wait %d times before comparing with DNS service provider\n", domains.Ipv4Cache.Times)
 		return "", domains.Ipv4Domains
 	}
 }

@@ -75,7 +75,7 @@ func (ns *NameSilo) Endpoint() string {
 }
 
 // Init 初始化
-func (ns *NameSilo) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (ns *NameSilo) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
 	ns.Domains.Ipv4Cache = ipv4cache
 	ns.Domains.Ipv6Cache = ipv6cache
 	ns.lastIpv4 = ipv4cache.Addr

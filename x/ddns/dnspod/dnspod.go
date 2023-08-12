@@ -56,7 +56,7 @@ func (dnspod *Dnspod) Endpoint() string {
 }
 
 // Init 初始化
-func (dnspod *Dnspod) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (dnspod *Dnspod) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
 	dnspod.Domains.Ipv4Cache = ipv4cache
 	dnspod.Domains.Ipv6Cache = ipv6cache
 	dnspod.DNS = dnsConf.DNS

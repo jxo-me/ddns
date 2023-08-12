@@ -47,8 +47,8 @@ type Ipv6 struct {
 	Domains []string `yaml:",omitempty" json:"domains"`
 }
 
-// DnsConfig 配置
-type DnsConfig struct {
+// DDnsConfig 配置
+type DDnsConfig struct {
 	Name    string   `json:"name"`
 	Delay   int64    `yaml:",omitempty" json:"delay"`
 	Ipv4    *Ipv4    `yaml:",omitempty"  json:"ipv4"`
@@ -58,11 +58,11 @@ type DnsConfig struct {
 	Webhook *Webhook `yaml:",omitempty" json:"webhook"`
 }
 
-func (conf *DnsConfig) getIpv4AddrFromInterface() string {
+func (conf *DDnsConfig) getIpv4AddrFromInterface() string {
 	log := logger.Default()
 	ipv4, _, err := util.GetNetInterface()
 	if err != nil {
-		log.Debugf("从网卡获得IPv4失败!")
+		log.Debugf("Failed to get IPv4 from network interface! error: %s\n", err.Error())
 		return ""
 	}
 
@@ -72,11 +72,11 @@ func (conf *DnsConfig) getIpv4AddrFromInterface() string {
 		}
 	}
 
-	log.Debug("从网卡中获得IPv4失败! 网卡名: ", conf.Ipv4.NetInterface)
+	log.Debug("Failed to get IPv4 from network interface! Interface name: ", conf.Ipv4.NetInterface)
 	return ""
 }
 
-func (conf *DnsConfig) getIpv4AddrFromUrl() string {
+func (conf *DDnsConfig) getIpv4AddrFromUrl() string {
 	log := logger.Default()
 	client := util.CreateNoProxyHTTPClient("tcp4")
 	urls := strings.Split(conf.Ipv4.URL, ",")
@@ -84,25 +84,25 @@ func (conf *DnsConfig) getIpv4AddrFromUrl() string {
 		url = strings.TrimSpace(url)
 		resp, err := client.Get(url)
 		if err != nil {
-			log.Debugf("错误信息: %s\n", err)
+			log.Debugf("Error message: %s\n", err)
 			continue
 		}
 		defer resp.Body.Close()
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			log.Debugf("读取IPv4结果失败! 接口: ", url)
+			log.Debugf("Failed to read IPv4 result! Interface:", url)
 			continue
 		}
 		result := Ipv4Reg.FindString(string(body))
 		if result == "" {
-			log.Debugf("获取IPv4结果失败! 接口: %s ,返回值: %s\n", url, result)
+			log.Debugf("Failed to get IPv4 result! Interface: %s, return value: %s\n", url, result)
 		}
 		return result
 	}
 	return ""
 }
 
-func (conf *DnsConfig) getAddrFromCmd(addrType string) string {
+func (conf *DDnsConfig) getAddrFromCmd(addrType string) string {
 	log := logger.Default()
 	var cmd string
 	var comp *regexp.Regexp
@@ -133,20 +133,20 @@ func (conf *DnsConfig) getAddrFromCmd(addrType string) string {
 	// run cmd
 	out, err := execCmd.CombinedOutput()
 	if err != nil {
-		log.Debugf("获取%s结果失败! 未能成功执行命令：%s，错误：%q，退出状态码：%s\n", addrType, execCmd.String(), out, err)
+		log.Debugf("Failed to get %s result! Failed to execute command: %s, error: %q, exit status code: %s\n", addrType, execCmd.String(), out, err)
 		return ""
 	}
 	str := string(out)
 	// get result
 	result := comp.FindString(str)
 	if result == "" {
-		log.Debugf("获取%s结果失败! 命令：%s，标准输出：%q\n", addrType, execCmd.String(), str)
+		log.Debugf("Failed to get %s result! Command: %s, standard output: %q\n", addrType, execCmd.String(), str)
 	}
 	return result
 }
 
 // GetIpv4Addr 获得IPv4地址
-func (conf *DnsConfig) GetIpv4Addr() string {
+func (conf *DDnsConfig) GetIpv4Addr() string {
 	log := logger.Default()
 	// 判断从哪里获取IP
 	switch conf.Ipv4.GetType {
@@ -160,16 +160,16 @@ func (conf *DnsConfig) GetIpv4Addr() string {
 		// 从命令行获取 IP
 		return conf.getAddrFromCmd("IPv4")
 	default:
-		log.Debugf("IPv4 的 获取 IP 方式 未知！")
+		log.Debugf("Unknown IPv4 way to get IP!")
 		return "" // unknown type
 	}
 }
 
-func (conf *DnsConfig) getIpv6AddrFromInterface() string {
+func (conf *DDnsConfig) getIpv6AddrFromInterface() string {
 	log := logger.Default()
 	_, ipv6, err := util.GetNetInterface()
 	if err != nil {
-		log.Debug("从网卡获得IPv6失败!")
+		log.Debug("Failed to get IPv6 from network interface!")
 		return ""
 	}
 
@@ -181,38 +181,38 @@ func (conf *DnsConfig) getIpv6AddrFromInterface() string {
 					num, err := strconv.Atoi(conf.Ipv6.IPv6Reg[1:])
 					if err == nil {
 						if num > 0 {
-							log.Debugf("IPv6将使用第 %d 个IPv6地址\n", num)
+							log.Debugf("IPv6 will use IPv6 address %d\n", num)
 							if num <= len(netInterface.Address) {
 								return netInterface.Address[num-1]
 							}
-							log.Debug("未找到第 %d 个IPv6地址! 将使用第一个IPv6地址\n", num)
+							log.Debug("IPv6 address %d not found! First IPv6 address will be used\n", num)
 							return netInterface.Address[0]
 						}
-						log.Debugf("IPv6匹配表达式 %s 不正确! 最小从1开始\n", conf.Ipv6.IPv6Reg)
+						log.Debugf("IPv6 matching expression %s is incorrect! Minimum starts from 1\n", conf.Ipv6.IPv6Reg)
 						return ""
 					}
 				}
 				// 正则表达式匹配
-				log.Infof("IPv6将使用正则表达式 %s 进行匹配\n", conf.Ipv6.IPv6Reg)
+				log.Infof("IPv6 will use the regular expression %s for matching\n", conf.Ipv6.IPv6Reg)
 				for i := 0; i < len(netInterface.Address); i++ {
 					matched, err := regexp.MatchString(conf.Ipv6.IPv6Reg, netInterface.Address[i])
 					if matched && err == nil {
-						log.Debugf("匹配成功! 匹配到地址: ", netInterface.Address[i])
+						log.Debugf("The match is successful! Matched to the address: ", netInterface.Address[i])
 						return netInterface.Address[i]
 					}
-					log.Debugf("第 %d 个地址 %s 不匹配, 将匹配下一个地址\n", i+1, netInterface.Address[i])
+					log.Debugf("%d address %s does not match, will match next address\n", i+1, netInterface.Address[i])
 				}
-				log.Infof("没有匹配到任何一个IPv6地址, 将使用第一个地址")
+				log.Infof("Does not match any IPv6 address, the first address will be used")
 			}
 			return netInterface.Address[0]
 		}
 	}
 
-	log.Infof("从网卡中获得IPv6失败! 网卡名: ", conf.Ipv6.NetInterface)
+	log.Infof("Failed to get IPv6 from network interface! Network interface name: ", conf.Ipv6.NetInterface)
 	return ""
 }
 
-func (conf *DnsConfig) getIpv6AddrFromUrl() string {
+func (conf *DDnsConfig) getIpv6AddrFromUrl() string {
 	log := logger.Default()
 	client := util.CreateNoProxyHTTPClient("tcp6")
 	urls := strings.Split(conf.Ipv6.URL, ",")
@@ -220,19 +220,19 @@ func (conf *DnsConfig) getIpv6AddrFromUrl() string {
 		url = strings.TrimSpace(url)
 		resp, err := client.Get(url)
 		if err != nil {
-			log.Infof("错误信息: %s\n", err)
+			log.Infof("Error message: %s\n", err)
 			continue
 		}
 
 		defer resp.Body.Close()
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			log.Infof("读取IPv6结果失败! 接口: ", url)
+			log.Infof("Failed to read IPv6 result! Interface:", url)
 			continue
 		}
 		result := Ipv6Reg.FindString(string(body))
 		if result == "" {
-			log.Infof("获取IPv6结果失败! 接口: %s ,返回值: %s\n", url, result)
+			log.Infof("Failed to get IPv6 result! Interface: %s, return value: %s\n", url, result)
 		}
 		return result
 	}
@@ -240,7 +240,7 @@ func (conf *DnsConfig) getIpv6AddrFromUrl() string {
 }
 
 // GetIpv6Addr 获得IPv6地址
-func (conf *DnsConfig) GetIpv6Addr() (result string) {
+func (conf *DDnsConfig) GetIpv6Addr() (result string) {
 	log := logger.Default()
 	// 判断从哪里获取IP
 	switch conf.Ipv6.GetType {
@@ -254,7 +254,7 @@ func (conf *DnsConfig) GetIpv6Addr() (result string) {
 		// 从命令行获取 IP
 		return conf.getAddrFromCmd("IPv6")
 	default:
-		log.Infof("IPv6 的 获取 IP 方式 未知！")
+		log.Infof("Unknown way to get IP for IPv6!")
 		return "" // unknown type
 	}
 }

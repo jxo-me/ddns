@@ -59,7 +59,7 @@ func (ali *Alidns) Endpoint() string {
 }
 
 // Init 初始化
-func (ali *Alidns) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (ali *Alidns) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
 	ali.Domains.Ipv4Cache = ipv4cache
 	ali.Domains.Ipv6Cache = ipv6cache
 	ali.DNS = dnsConf.DNS

@@ -57,7 +57,7 @@ func (pb *Porkbun) Endpoint() string {
 }
 
 // Init 初始化
-func (pb *Porkbun) Init(conf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (pb *Porkbun) Init(conf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
 	pb.Domains.Ipv4Cache = ipv4cache
 	pb.Domains.Ipv6Cache = ipv6cache
 	pb.DNSConfig = conf.DNS

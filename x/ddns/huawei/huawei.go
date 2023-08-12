@@ -60,7 +60,7 @@ func (hw *Huaweicloud) Endpoint() string {
 }
 
 // Init 初始化
-func (hw *Huaweicloud) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (hw *Huaweicloud) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
 	hw.Domains.Ipv4Cache = ipv4cache
 	hw.Domains.Ipv6Cache = ipv6cache
 	hw.DNS = dnsConf.DNS

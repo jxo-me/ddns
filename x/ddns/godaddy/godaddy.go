@@ -44,7 +44,7 @@ func (g *GoDaddyDNS) Endpoint() string {
 	return ""
 }
 
-func (g *GoDaddyDNS) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (g *GoDaddyDNS) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
 	g.domains.Ipv4Cache = ipv4cache
 	g.domains.Ipv6Cache = ipv6cache
 	g.lastIpv4 = ipv4cache.Addr

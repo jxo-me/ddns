@@ -37,7 +37,7 @@ func (gd *GoogleDomain) Endpoint() string {
 }
 
 // Init 初始化
-func (gd *GoogleDomain) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (gd *GoogleDomain) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
 	gd.Domains.Ipv4Cache = ipv4cache
 	gd.Domains.Ipv6Cache = ipv6cache
 	gd.DNS = dnsConf.DNS

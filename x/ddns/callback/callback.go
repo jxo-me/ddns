@@ -33,7 +33,7 @@ func (cb *Callback) Endpoint() string {
 }
 
 // Init 初始化
-func (cb *Callback) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (cb *Callback) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
 	cb.Domains.Ipv4Cache = ipv4cache
 	cb.Domains.Ipv6Cache = ipv6cache
 	cb.lastIpv4 = ipv4cache.Addr

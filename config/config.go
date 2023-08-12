@@ -25,8 +25,8 @@ var (
 )
 
 type Config struct {
-	Services []*DnsConfig `json:"services"`
-	Log      *LogConfig   `yaml:",omitempty" json:"log,omitempty"`
+	DDns []*DDnsConfig `json:"ddns"`
+	Log  *LogConfig    `yaml:",omitempty" json:"log,omitempty"`
 }
 
 func Global() *Config {

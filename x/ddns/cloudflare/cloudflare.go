@@ -67,7 +67,7 @@ func (cf *Cloudflare) Endpoint() string {
 }
 
 // Init 初始化
-func (cf *Cloudflare) Init(dnsConf *config.DnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (cf *Cloudflare) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
 	cf.Domains.Ipv4Cache = ipv4cache
 	cf.Domains.Ipv6Cache = ipv6cache
 	cf.DNS = dnsConf.DNS

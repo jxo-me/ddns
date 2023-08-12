@@ -17,7 +17,7 @@ import (
 type DDNSService struct {
 	DDNS               ddns.IDDNS
 	IpCache            [2]cache.IpCache
-	Conf               *config.DnsConfig
+	Conf               *config.DDnsConfig
 	Delay              time.Duration
 	ForceCompareGlobal bool
 	stop               chan chan struct{}
@@ -29,7 +29,7 @@ func (s *DDNSService) String() string {
 	return s.DDNS.String()
 }
 
-func NewDDNS(d ddns.IDDNS, log logger.ILogger, conf *config.DnsConfig) *DDNSService {
+func NewDDNS(d ddns.IDDNS, log logger.ILogger, conf *config.DDnsConfig) *DDNSService {
 	st := consts.StatusRunning
 	s := &DDNSService{
 		DDNS:               d,

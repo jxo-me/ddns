@@ -68,7 +68,7 @@ func (p *program) mergeConfig(cfg1, cfg2 *config.Config) *config.Config {
 	}
 
 	cfg := &config.Config{
-		Services: append(cfg1.Services, cfg2.Services...),
+		DDns: append(cfg1.DDns, cfg2.DDns...),
 	}
 
 	return cfg

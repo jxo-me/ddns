@@ -39,14 +39,14 @@ func buildConfigFromCmd(services stringList) (*config.Config, error) {
 		}
 		service.Name = fmt.Sprintf("%sservice-%d", namePrefix, i)
 
-		cfg.Services = append(cfg.Services, service)
+		cfg.DDns = append(cfg.DDns, service)
 
 	}
 
 	return cfg, nil
 }
 
-func buildServiceConfig(url *url.URL) (*config.DnsConfig, error) {
+func buildServiceConfig(url *url.URL) (*config.DDnsConfig, error) {
 
 	return nil, nil
 }
