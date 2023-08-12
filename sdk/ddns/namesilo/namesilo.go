@@ -5,10 +5,10 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -26,6 +26,7 @@ type NameSilo struct {
 	Domains  ddns.Domains
 	lastIpv4 string
 	lastIpv6 string
+	logger   logger.ILogger
 }
 
 // NameSiloResp 修改域名解析结果
@@ -76,7 +77,7 @@ func (ns *NameSilo) Endpoint() string {
 }
 
 // Init 初始化
-func (ns *NameSilo) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (ns *NameSilo) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	ns.Domains.Ipv4Cache = ipv4cache
 	ns.Domains.Ipv6Cache = ipv6cache
 	ns.lastIpv4 = ipv4cache.GetAddr()
@@ -84,6 +85,7 @@ func (ns *NameSilo) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, i
 
 	ns.DNS = dnsConf.DNS
 	ns.Domains.GetNewIp(dnsConf)
+	ns.logger = log
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
@@ -108,7 +110,7 @@ func (ns *NameSilo) addUpdateDomainRecords(recordType string) {
 		// 拿到DNS记录列表，从列表中去取对应域名的id，有id进行修改，没ID进行新增
 		records, err := ns.listRecords(domain)
 		if err != nil {
-			log.Printf("获取域名列表 %s 失败！", domain)
+			ns.logger.Infof("获取域名列表 %s 失败！", domain)
 			domain.UpdateStatus = consts.UpdatedFailed
 			return
 		}
@@ -121,7 +123,7 @@ func (ns *NameSilo) addUpdateDomainRecords(recordType string) {
 		} else {
 			recordID = record.RecordID
 			if record.Value == ipAddr {
-				log.Printf("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
+				ns.logger.Infof("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
 				return
 			}
 		}
@@ -142,17 +144,17 @@ func (ns *NameSilo) modify(domain *ddns.Domain, recordID, recordType, ipAddr str
 		result, err = ns.request(ipAddr, domain, recordID, "", nameSiloUpdateRecordEndpoint)
 	}
 	if err != nil {
-		log.Printf("修改域名解析 %s 失败！", domain)
+		ns.logger.Infof("修改域名解析 %s 失败！", domain)
 		domain.UpdateStatus = consts.UpdatedFailed
 		return
 	}
 	var resp NameSiloResp
 	xml.Unmarshal([]byte(result), &resp)
 	if resp.Reply.Code == 300 {
-		log.Printf("%s 域名解析 %s 成功！IP: %s\n", requestType, domain, ipAddr)
+		ns.logger.Infof("%s 域名解析 %s 成功！IP: %s\n", requestType, domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("%s 域名解析 %s 失败！Deatil: %s\n", requestType, domain, resp.Reply.Detail)
+		ns.logger.Infof("%s 域名解析 %s 失败！Deatil: %s\n", requestType, domain, resp.Reply.Detail)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -182,14 +184,14 @@ func (ns *NameSilo) request(ipAddr string, domain *ddns.Domain, recordID, record
 	)
 
 	if err != nil {
-		log.Println("http.NewRequest失败. Error: ", err)
+		ns.logger.Infof("http.NewRequest失败. Error: ", err)
 		return
 	}
 
 	client := util.CreateHTTPClient()
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("client.Do失败. Error: ", err)
+		ns.logger.Infof("client.Do失败. Error: ", err)
 		return
 	}
 

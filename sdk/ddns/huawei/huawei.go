@@ -7,9 +7,9 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -25,6 +25,7 @@ type Huaweicloud struct {
 	DNS     *config.DNS
 	Domains ddns.Domains
 	TTL     int
+	logger  logger.ILogger
 }
 
 // HuaweicloudZonesResp zones response
@@ -61,11 +62,12 @@ func (hw *Huaweicloud) Endpoint() string {
 }
 
 // Init 初始化
-func (hw *Huaweicloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (hw *Huaweicloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	hw.Domains.Ipv4Cache = ipv4cache
 	hw.Domains.Ipv6Cache = ipv6cache
 	hw.DNS = dnsConf.DNS
 	hw.Domains.GetNewIp(dnsConf)
+	hw.logger = log
 	if dnsConf.TTL == "" {
 		// 默认300s
 		hw.TTL = 300
@@ -135,7 +137,7 @@ func (hw *Huaweicloud) create(domain *ddns.Domain, recordType string, ipAddr str
 		return
 	}
 	if len(zone.Zones) == 0 {
-		log.Println("未能找到公网域名, 请检查域名是否添加")
+		hw.logger.Infof("未能找到公网域名, 请检查域名是否添加")
 		return
 	}
 
@@ -161,10 +163,10 @@ func (hw *Huaweicloud) create(domain *ddns.Domain, recordType string, ipAddr str
 		&result,
 	)
 	if err == nil && (len(result.Records) > 0 && result.Records[0] == ipAddr) {
-		log.Printf("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
+		hw.logger.Infof("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("新增域名解析 %s 失败！Status: %s", domain, result.Status)
+		hw.logger.Infof("新增域名解析 %s 失败！Status: %s", domain, result.Status)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -174,7 +176,7 @@ func (hw *Huaweicloud) modify(record HuaweicloudRecordsets, domain *ddns.Domain,
 
 	// 相同不修改
 	if len(record.Records) > 0 && record.Records[0] == ipAddr {
-		log.Printf("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
+		hw.logger.Infof("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
 		return
 	}
 
@@ -192,10 +194,10 @@ func (hw *Huaweicloud) modify(record HuaweicloudRecordsets, domain *ddns.Domain,
 	)
 
 	if err == nil && (len(result.Records) > 0 && result.Records[0] == ipAddr) {
-		log.Printf("更新域名解析 %s 成功！IP: %s, 状态: %s", domain, ipAddr, result.Status)
+		hw.logger.Infof("更新域名解析 %s 成功！IP: %s, 状态: %s", domain, ipAddr, result.Status)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("更新域名解析 %s 失败！Status: %s", domain, result.Status)
+		hw.logger.Infof("更新域名解析 %s 失败！Status: %s", domain, result.Status)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -226,7 +228,7 @@ func (hw *Huaweicloud) request(method string, url string, data interface{}, resu
 	)
 
 	if err != nil {
-		log.Println("http.NewRequest失败. Error: ", err)
+		hw.logger.Infof("http.NewRequest失败. Error: ", err)
 		return
 	}
 

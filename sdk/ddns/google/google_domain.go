@@ -4,10 +4,10 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -25,6 +25,7 @@ type GoogleDomain struct {
 	Domains  ddns.Domains
 	lastIpv4 string
 	lastIpv6 string
+	logger   logger.ILogger
 }
 
 // GoogleDomainResp 修改域名解析结果
@@ -38,11 +39,12 @@ func (gd *GoogleDomain) Endpoint() string {
 }
 
 // Init 初始化
-func (gd *GoogleDomain) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (gd *GoogleDomain) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	gd.Domains.Ipv4Cache = ipv4cache
 	gd.Domains.Ipv6Cache = ipv6cache
 	gd.DNS = dnsConf.DNS
 	gd.Domains.GetNewIp(dnsConf)
+	gd.logger = log
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
@@ -62,12 +64,12 @@ func (gd *GoogleDomain) addUpdateDomainRecords(recordType string) {
 	// 防止多次发送Webhook通知
 	if recordType == "A" {
 		if gd.lastIpv4 == ipAddr {
-			log.Println("你的IPv4未变化, 未触发Google请求")
+			gd.logger.Infof("你的IPv4未变化, 未触发Google请求")
 			return
 		}
 	} else {
 		if gd.lastIpv6 == ipAddr {
-			log.Println("你的IPv6未变化, 未触发Google请求")
+			gd.logger.Infof("你的IPv6未变化, 未触发Google请求")
 			return
 		}
 	}
@@ -91,19 +93,19 @@ func (gd *GoogleDomain) modify(domain *ddns.Domain, recordType string, ipAddr st
 	err := gd.request(params, &result)
 
 	if err != nil {
-		log.Printf("修改域名解析 %s 失败！", domain)
+		gd.logger.Infof("修改域名解析 %s 失败！", domain)
 		domain.UpdateStatus = consts.UpdatedFailed
 		return
 	}
 
 	switch result.Status {
 	case "nochg":
-		log.Printf("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
+		gd.logger.Infof("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
 	case "good":
-		log.Printf("修改域名解析 %s 成功！IP: %s", domain, ipAddr)
+		gd.logger.Infof("修改域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	default:
-		log.Printf("修改域名解析 %s 失败！Status: %s", domain, result.Status)
+		gd.logger.Infof("修改域名解析 %s 失败！Status: %s", domain, result.Status)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -118,7 +120,7 @@ func (gd *GoogleDomain) request(params url.Values, result *GoogleDomainResp) (er
 	)
 
 	if err != nil {
-		log.Println("http.NewRequest失败. Error: ", err)
+		gd.logger.Infof("http.NewRequest失败. Error: ", err)
 		return
 	}
 
@@ -128,7 +130,7 @@ func (gd *GoogleDomain) request(params url.Values, result *GoogleDomainResp) (er
 	client := util.CreateHTTPClient()
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("client.Do失败. Error: ", err)
+		gd.logger.Infof("client.Do失败. Error: ", err)
 		return
 	}
 

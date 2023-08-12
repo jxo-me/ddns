@@ -7,9 +7,9 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
-	"log"
 	"net/http"
 )
 
@@ -22,6 +22,7 @@ type Porkbun struct {
 	DNSConfig *config.DNS
 	Domains   ddns.Domains
 	TTL       string
+	logger    logger.ILogger
 }
 type PorkbunDomainRecord struct {
 	Name    *string `json:"name"`    // subdomain
@@ -58,11 +59,12 @@ func (pb *Porkbun) Endpoint() string {
 }
 
 // Init 初始化
-func (pb *Porkbun) Init(conf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (pb *Porkbun) Init(conf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	pb.Domains.Ipv4Cache = ipv4cache
 	pb.Domains.Ipv6Cache = ipv6cache
 	pb.DNSConfig = conf.DNS
 	pb.Domains.GetNewIp(conf)
+	pb.logger = log
 	if conf.TTL == "" {
 		// 默认600s
 		pb.TTL = "600"
@@ -110,7 +112,7 @@ func (pb *Porkbun) addUpdateDomainRecords(recordType string) {
 				pb.create(domain, &recordType, &ipAddr)
 			}
 		} else {
-			log.Printf("查询现有域名记录失败")
+			pb.logger.Infof("查询现有域名记录失败")
 			domain.UpdateStatus = consts.UpdatedFailed
 		}
 	}
@@ -138,10 +140,10 @@ func (pb *Porkbun) create(domain *ddns.Domain, recordType *string, ipAddr *strin
 	)
 
 	if err == nil && response.Status == "SUCCESS" {
-		log.Printf("新增域名解析 %s 成功！IP: %s", domain, *ipAddr)
+		pb.logger.Infof("新增域名解析 %s 成功！IP: %s", domain, *ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("新增域名解析 %s 失败！", domain)
+		pb.logger.Infof("新增域名解析 %s 失败！", domain)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -151,7 +153,7 @@ func (pb *Porkbun) modify(record *PorkbunDomainQueryResponse, domain *ddns.Domai
 
 	// 相同不修改
 	if len(record.Records) > 0 && *record.Records[0].Content == *ipAddr {
-		log.Printf("你的IP %s 没有变化, 域名 %s", *ipAddr, domain)
+		pb.logger.Infof("你的IP %s 没有变化, 域名 %s", *ipAddr, domain)
 		return
 	}
 
@@ -173,10 +175,10 @@ func (pb *Porkbun) modify(record *PorkbunDomainQueryResponse, domain *ddns.Domai
 	)
 
 	if err == nil && response.Status == "SUCCESS" {
-		log.Printf("更新域名解析 %s 成功！IP: %s", domain, *ipAddr)
+		pb.logger.Infof("更新域名解析 %s 成功！IP: %s", domain, *ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("更新域名解析 %s 失败！", domain)
+		pb.logger.Infof("更新域名解析 %s 失败！", domain)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -193,7 +195,7 @@ func (pb *Porkbun) request(url string, data interface{}, result interface{}) (er
 		bytes.NewBuffer(jsonStr),
 	)
 	if err != nil {
-		log.Println("http.NewRequest失败. Error: ", err)
+		pb.logger.Infof("http.NewRequest失败. Error: ", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")

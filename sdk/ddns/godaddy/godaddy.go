@@ -7,9 +7,9 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -35,6 +35,7 @@ type GoDaddyDNS struct {
 	client   *http.Client
 	lastIpv4 string
 	lastIpv6 string
+	logger   logger.ILogger
 }
 
 func (g *GoDaddyDNS) String() string {
@@ -45,7 +46,7 @@ func (g *GoDaddyDNS) Endpoint() string {
 	return ""
 }
 
-func (g *GoDaddyDNS) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (g *GoDaddyDNS) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	g.domains.Ipv4Cache = ipv4cache
 	g.domains.Ipv6Cache = ipv6cache
 	g.lastIpv4 = ipv4cache.GetAddr()
@@ -53,6 +54,7 @@ func (g *GoDaddyDNS) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, 
 
 	g.dns = dnsConf.DNS
 	g.domains.GetNewIp(dnsConf)
+	g.logger = log
 	g.ttl = 600
 	if val, err := strconv.Atoi(dnsConf.TTL); err == nil {
 		g.ttl = val
@@ -73,12 +75,12 @@ func (g *GoDaddyDNS) updateDomainRecord(recordType string, ipAddr string, domain
 	// 防止多次发送Webhook通知
 	if recordType == "A" {
 		if g.lastIpv4 == ipAddr {
-			log.Println("你的IPv4未变化, 未触发Godaddy请求")
+			g.logger.Infof("你的IPv4未变化, 未触发Godaddy请求")
 			return
 		}
 	} else {
 		if g.lastIpv6 == ipAddr {
-			log.Println("你的IPv6未变化, 未触发Godaddy请求")
+			g.logger.Infof("你的IPv6未变化, 未触发Godaddy请求")
 			return
 		}
 	}
@@ -91,10 +93,10 @@ func (g *GoDaddyDNS) updateDomainRecord(recordType string, ipAddr string, domain
 			Type: recordType,
 		}})
 		if err == nil {
-			log.Printf("更新域名解析 %s 成功! IP: %s", domain, ipAddr)
+			g.logger.Infof("更新域名解析 %s 成功! IP: %s", domain, ipAddr)
 			domain.UpdateStatus = consts.UpdatedSuccess
 		} else {
-			log.Printf("更新域名解析 %s 失败！", domain)
+			g.logger.Infof("更新域名解析 %s 失败！", domain)
 			domain.UpdateStatus = consts.UpdatedFailed
 		}
 	}

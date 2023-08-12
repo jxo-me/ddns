@@ -5,9 +5,9 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
-	"log"
 	"net/http"
 	"net/url"
 )
@@ -28,6 +28,7 @@ type Alidns struct {
 	DNS     *config.DNS
 	Domains ddns.Domains
 	TTL     string
+	logger  logger.ILogger
 }
 
 // AlidnsRecord record
@@ -60,11 +61,12 @@ func (ali *Alidns) Endpoint() string {
 }
 
 // Init 初始化
-func (ali *Alidns) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (ali *Alidns) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	ali.Domains.Ipv4Cache = ipv4cache
 	ali.Domains.Ipv6Cache = ipv6cache
 	ali.DNS = dnsConf.DNS
 	ali.Domains.GetNewIp(dnsConf)
+	ali.logger = log
 	if dnsConf.TTL == "" {
 		// 默认600s
 		ali.TTL = "600"
@@ -136,10 +138,10 @@ func (ali *Alidns) create(domain *ddns.Domain, recordType string, ipAddr string)
 	err := ali.request(params, &result)
 
 	if err == nil && result.RecordID != "" {
-		log.Printf("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
+		ali.logger.Infof("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("新增域名解析 %s 失败！", domain)
+		ali.logger.Infof("新增域名解析 %s 失败！", domain)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -149,7 +151,7 @@ func (ali *Alidns) modify(recordSelected AlidnsRecord, domain *ddns.Domain, reco
 
 	// 相同不修改
 	if recordSelected.Value == ipAddr {
-		log.Printf("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
+		ali.logger.Infof("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
 		return
 	}
 
@@ -165,10 +167,10 @@ func (ali *Alidns) modify(recordSelected AlidnsRecord, domain *ddns.Domain, reco
 	err := ali.request(params, &result)
 
 	if err == nil && result.RecordID != "" {
-		log.Printf("更新域名解析 %s 成功！IP: %s", domain, ipAddr)
+		ali.logger.Infof("更新域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("更新域名解析 %s 失败！", domain)
+		ali.logger.Infof("更新域名解析 %s 失败！", domain)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -186,7 +188,7 @@ func (ali *Alidns) request(params url.Values, result interface{}) (err error) {
 	req.URL.RawQuery = params.Encode()
 
 	if err != nil {
-		log.Println("http.NewRequest失败. Error: ", err)
+		ali.logger.Infof("http.NewRequest失败. Error: ", err)
 		return
 	}
 

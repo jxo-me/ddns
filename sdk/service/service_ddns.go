@@ -49,7 +49,7 @@ func (s *DDNSService) Run() {
 	if s.ForceCompareGlobal {
 		s.IpCache = [2]iCache.IIpCache{&cache.IpCache{}, &cache.IpCache{}}
 	}
-	s.DDNS.Init(s.Conf, s.IpCache[0], s.IpCache[1])
+	s.DDNS.Init(s.Conf, s.IpCache[0], s.IpCache[1], s.logger)
 	domains := s.DDNS.AddUpdateDomainRecords()
 	// webhook
 	if s.Conf.Webhook != nil {

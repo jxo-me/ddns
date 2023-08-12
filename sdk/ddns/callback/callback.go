@@ -5,9 +5,9 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -23,6 +23,7 @@ type Callback struct {
 	TTL      string
 	lastIpv4 string
 	lastIpv6 string
+	logger   logger.ILogger
 }
 
 func (cb *Callback) String() string {
@@ -34,7 +35,7 @@ func (cb *Callback) Endpoint() string {
 }
 
 // Init 初始化
-func (cb *Callback) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (cb *Callback) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	cb.Domains.Ipv4Cache = ipv4cache
 	cb.Domains.Ipv6Cache = ipv6cache
 	cb.lastIpv4 = ipv4cache.GetAddr()
@@ -42,6 +43,7 @@ func (cb *Callback) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, i
 
 	cb.DNS = dnsConf.DNS
 	cb.Domains.GetNewIp(dnsConf)
+	cb.logger = log
 	if dnsConf.TTL == "" {
 		// 默认600
 		cb.TTL = "600"
@@ -67,12 +69,12 @@ func (cb *Callback) addUpdateDomainRecords(recordType string) {
 	// 防止多次发送Webhook通知
 	if recordType == "A" {
 		if cb.lastIpv4 == ipAddr {
-			log.Println("你的IPv4未变化, 未触发Callback")
+			cb.logger.Infof("你的IPv4未变化, 未触发Callback")
 			return
 		}
 	} else {
 		if cb.lastIpv6 == ipAddr {
-			log.Println("你的IPv6未变化, 未触发Callback")
+			cb.logger.Infof("你的IPv6未变化, 未触发Callback")
 			return
 		}
 	}
@@ -91,12 +93,12 @@ func (cb *Callback) addUpdateDomainRecords(recordType string) {
 		requestURL := replacePara(cb.DNS.ID, ipAddr, domain, recordType, cb.TTL)
 		u, err := url.Parse(requestURL)
 		if err != nil {
-			log.Println("Callback的URL不正确")
+			cb.logger.Infof("Callback的URL不正确")
 			return
 		}
 		req, err := http.NewRequest(method, u.String(), strings.NewReader(postPara))
 		if err != nil {
-			log.Println("创建Callback请求异常, Err:", err)
+			cb.logger.Infof("创建Callback请求异常, Err:", err)
 			return
 		}
 		req.Header.Add("content-type", contentType)
@@ -105,10 +107,10 @@ func (cb *Callback) addUpdateDomainRecords(recordType string) {
 		resp, err := clt.Do(req)
 		body, err := util.GetHTTPResponseOrg(resp, requestURL, err)
 		if err == nil {
-			log.Printf("Callback调用成功, 域名: %s, IP: %s, 返回数据: %s, \n", domain, ipAddr, string(body))
+			cb.logger.Infof("Callback调用成功, 域名: %s, IP: %s, 返回数据: %s, \n", domain, ipAddr, string(body))
 			domain.UpdateStatus = consts.UpdatedSuccess
 		} else {
-			log.Printf("Callback调用失败，Err：%s\n", err)
+			cb.logger.Infof("Callback调用失败，Err：%s\n", err)
 			domain.UpdateStatus = consts.UpdatedFailed
 		}
 	}

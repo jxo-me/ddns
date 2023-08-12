@@ -6,9 +6,9 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -25,6 +25,7 @@ type TencentCloud struct {
 	DNS     *config.DNS
 	Domains ddns.Domains
 	TTL     int
+	logger  logger.ILogger
 }
 
 // TencentCloudRecord 腾讯云记录
@@ -75,11 +76,12 @@ func (tc *TencentCloud) Endpoint() string {
 	return Endpoint
 }
 
-func (tc *TencentCloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (tc *TencentCloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	tc.Domains.Ipv4Cache = ipv4cache
 	tc.Domains.Ipv6Cache = ipv6cache
 	tc.DNS = dnsConf.DNS
 	tc.Domains.GetNewIp(dnsConf)
+	tc.logger = log
 	if dnsConf.TTL == "" {
 		// 默认 600s
 		tc.TTL = 600
@@ -154,10 +156,10 @@ func (tc *TencentCloud) create(domain *ddns.Domain, recordType string, ipAddr st
 		&status,
 	)
 	if err == nil && status.Response.Error.Code == "" {
-		log.Printf("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
+		tc.logger.Infof("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("新增域名解析 %s 失败！Code: %s, Message: %s", domain, status.Response.Error.Code, status.Response.Error.Message)
+		tc.logger.Infof("新增域名解析 %s 失败！Code: %s, Message: %s", domain, status.Response.Error.Code, status.Response.Error.Message)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -167,7 +169,7 @@ func (tc *TencentCloud) create(domain *ddns.Domain, recordType string, ipAddr st
 func (tc *TencentCloud) modify(record TencentCloudRecord, domain *ddns.Domain, recordType string, ipAddr string) {
 	// 相同不修改
 	if record.Value == ipAddr {
-		log.Printf("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
+		tc.logger.Infof("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
 		return
 	}
 	var status TencentCloudStatus
@@ -183,10 +185,10 @@ func (tc *TencentCloud) modify(record TencentCloudRecord, domain *ddns.Domain, r
 		&status,
 	)
 	if err == nil && status.Response.Error.Code == "" {
-		log.Printf("更新域名解析 %s 成功！IP: %s", domain, ipAddr)
+		tc.logger.Infof("更新域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("更新域名解析 %s 失败！Code: %s, Message: %s", domain, status.Response.Error.Code, status.Response.Error.Message)
+		tc.logger.Infof("更新域名解析 %s 失败！Code: %s, Message: %s", domain, status.Response.Error.Code, status.Response.Error.Message)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -229,7 +231,7 @@ func (tc *TencentCloud) request(action string, data interface{}, result interfac
 		bytes.NewBuffer(jsonStr),
 	)
 	if err != nil {
-		log.Println("http.NewRequest 失败. Error: ", err)
+		tc.logger.Infof("http.NewRequest 失败. Error: ", err)
 		return
 	}
 

@@ -4,10 +4,10 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -23,6 +23,7 @@ type NameCheap struct {
 	Domains  ddns.Domains
 	lastIpv4 string
 	lastIpv6 string
+	logger   logger.ILogger
 }
 
 // NameCheapResp 修改域名解析结果
@@ -40,7 +41,7 @@ func (nc *NameCheap) Endpoint() string {
 }
 
 // Init 初始化
-func (nc *NameCheap) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (nc *NameCheap) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	nc.Domains.Ipv4Cache = ipv4cache
 	nc.Domains.Ipv6Cache = ipv6cache
 	nc.lastIpv4 = ipv4cache.GetAddr()
@@ -48,6 +49,7 @@ func (nc *NameCheap) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, 
 
 	nc.DNS = dnsConf.DNS
 	nc.Domains.GetNewIp(dnsConf)
+	nc.logger = log
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
@@ -67,15 +69,15 @@ func (nc *NameCheap) addUpdateDomainRecords(recordType string) {
 	// 防止多次发送Webhook通知
 	if recordType == "A" {
 		if nc.lastIpv4 == ipAddr {
-			log.Println("你的IPv4未变化, 未触发Namecheap请求")
+			nc.logger.Infof("你的IPv4未变化, 未触发Namecheap请求")
 			return
 		}
 	} else {
 		// https://www.namecheap.com/support/knowledgebase/article.aspx/29/11/how-to-dynamically-update-the-hosts-ip-with-an-http-request/
-		log.Println("Namecheap DDNS 不支持更新 IPv6！")
+		nc.logger.Infof("Namecheap DDNS 不支持更新 IPv6！")
 		return
 		// if nc.lastIpv6 == ipAddr {
-		// 	log.Println("你的IPv6未变化, 未触发Namecheap请求")
+		// 	nc.logger.Infof("你的IPv6未变化, 未触发Namecheap请求")
 		// 	return
 		// }
 	}
@@ -91,17 +93,17 @@ func (nc *NameCheap) modify(domain *ddns.Domain, recordType string, ipAddr strin
 	err := nc.request(&result, ipAddr, domain)
 
 	if err != nil {
-		log.Printf("修改域名解析 %s 失败！", domain)
+		nc.logger.Infof("修改域名解析 %s 失败！", domain)
 		domain.UpdateStatus = consts.UpdatedFailed
 		return
 	}
 
 	switch result.Status {
 	case "Success":
-		log.Printf("修改域名解析 %s 成功！IP: %s\n", domain, ipAddr)
+		nc.logger.Infof("修改域名解析 %s 成功！IP: %s\n", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	default:
-		log.Printf("修改域名解析 %s 失败！Status: %s\n", domain, result.Status)
+		nc.logger.Infof("修改域名解析 %s 失败！Status: %s\n", domain, result.Status)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -121,21 +123,21 @@ func (nc *NameCheap) request(result *NameCheapResp, ipAddr string, domain *ddns.
 	)
 
 	if err != nil {
-		log.Println("http.NewRequest失败. Error: ", err)
+		nc.logger.Infof("http.NewRequest失败. Error: ", err)
 		return
 	}
 
 	client := util.CreateHTTPClient()
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("client.Do失败. Error: ", err)
+		nc.logger.Infof("client.Do失败. Error: ", err)
 		return
 	}
 
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("请求namecheap失败")
+		nc.logger.Infof("请求namecheap失败")
 		return err
 	}
 

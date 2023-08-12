@@ -6,9 +6,9 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -24,6 +24,7 @@ type BaiduCloud struct {
 	DNS     *config.DNS
 	Domains ddns.Domains
 	TTL     int
+	logger  logger.ILogger
 }
 
 // BaiduRecord 单条解析记录
@@ -79,11 +80,12 @@ func (baidu *BaiduCloud) Endpoint() string {
 	return Endpoint
 }
 
-func (baidu *BaiduCloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (baidu *BaiduCloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	baidu.Domains.Ipv4Cache = ipv4cache
 	baidu.Domains.Ipv6Cache = ipv6cache
 	baidu.DNS = dnsConf.DNS
 	baidu.Domains.GetNewIp(dnsConf)
+	baidu.logger = log
 	if dnsConf.TTL == "" {
 		// 默认300s
 		baidu.TTL = 300
@@ -154,10 +156,10 @@ func (baidu *BaiduCloud) create(domain *ddns.Domain, recordType string, ipAddr s
 
 	err := baidu.request("POST", Endpoint+"/v1/domain/resolve/add", baiduCreateRequest, &result)
 	if err == nil {
-		log.Printf("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
+		baidu.logger.Infof("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("新增域名解析 %s 失败！", domain)
+		baidu.logger.Infof("新增域名解析 %s 失败！", domain)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -166,7 +168,7 @@ func (baidu *BaiduCloud) create(domain *ddns.Domain, recordType string, ipAddr s
 func (baidu *BaiduCloud) modify(record BaiduRecord, domain *ddns.Domain, rdType string, ipAddr string) {
 	//没有变化直接跳过
 	if record.Rdata == ipAddr {
-		log.Printf("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
+		baidu.logger.Infof("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
 		return
 	}
 	var baiduModifyRequest = BaiduModifyRequest{
@@ -182,10 +184,10 @@ func (baidu *BaiduCloud) modify(record BaiduRecord, domain *ddns.Domain, rdType 
 
 	err := baidu.request("POST", Endpoint+"/v1/domain/resolve/edit", baiduModifyRequest, &result)
 	if err == nil {
-		log.Printf("更新域名解析 %s 成功！IP: %s", domain, ipAddr)
+		baidu.logger.Infof("更新域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("更新域名解析 %s 失败！", domain)
+		baidu.logger.Infof("更新域名解析 %s 失败！", domain)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -204,7 +206,7 @@ func (baidu *BaiduCloud) request(method string, url string, data interface{}, re
 	)
 
 	if err != nil {
-		log.Println("http.NewRequest失败. Error: ", err)
+		baidu.logger.Infof("http.NewRequest失败. Error: ", err)
 		return
 	}
 

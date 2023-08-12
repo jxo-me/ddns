@@ -7,9 +7,9 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -24,6 +24,7 @@ type Cloudflare struct {
 	DNS     *config.DNS
 	Domains ddns.Domains
 	TTL     int
+	logger  logger.ILogger
 }
 
 // CloudflareZonesResp cloudflare zones返回结果
@@ -68,7 +69,7 @@ func (cf *Cloudflare) Endpoint() string {
 }
 
 // Init 初始化
-func (cf *Cloudflare) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (cf *Cloudflare) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	cf.Domains.Ipv4Cache = ipv4cache
 	cf.Domains.Ipv6Cache = ipv6cache
 	cf.DNS = dnsConf.DNS
@@ -150,10 +151,10 @@ func (cf *Cloudflare) create(zoneID string, domain *ddns.Domain, recordType stri
 		&status,
 	)
 	if err == nil && status.Success {
-		log.Printf("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
+		cf.logger.Infof("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("新增域名解析 %s 失败！Messages: %s", domain, status.Messages)
+		cf.logger.Infof("新增域名解析 %s 失败！Messages: %s", domain, status.Messages)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -163,7 +164,7 @@ func (cf *Cloudflare) modify(result CloudflareRecordsResp, zoneID string, domain
 	for _, record := range result.Result {
 		// 相同不修改
 		if record.Content == ipAddr {
-			log.Printf("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
+			cf.logger.Infof("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
 			continue
 		}
 		var status CloudflareStatus
@@ -180,10 +181,10 @@ func (cf *Cloudflare) modify(result CloudflareRecordsResp, zoneID string, domain
 			&status,
 		)
 		if err == nil && status.Success {
-			log.Printf("更新域名解析 %s 成功！IP: %s", domain, ipAddr)
+			cf.logger.Infof("更新域名解析 %s 成功！IP: %s", domain, ipAddr)
 			domain.UpdateStatus = consts.UpdatedSuccess
 		} else {
-			log.Printf("更新域名解析 %s 失败！Messages: %s", domain, status.Messages)
+			cf.logger.Infof("更新域名解析 %s 失败！Messages: %s", domain, status.Messages)
 			domain.UpdateStatus = consts.UpdatedFailed
 		}
 	}
@@ -213,7 +214,7 @@ func (cf *Cloudflare) request(method string, url string, data interface{}, resul
 		bytes.NewBuffer(jsonStr),
 	)
 	if err != nil {
-		log.Println("http.NewRequest失败. Error: ", err)
+		cf.logger.Infof("http.NewRequest失败. Error: ", err)
 		return
 	}
 	req.Header.Set("Authorization", "Bearer "+cf.DNS.Secret)

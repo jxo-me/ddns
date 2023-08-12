@@ -4,9 +4,9 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
-	"log"
 	"net/url"
 )
 
@@ -23,6 +23,7 @@ type Dnspod struct {
 	DNS     *config.DNS
 	Domains ddns.Domains
 	TTL     string
+	logger  logger.ILogger
 }
 
 // DnspodRecord DnspodRecord
@@ -57,11 +58,12 @@ func (dnspod *Dnspod) Endpoint() string {
 }
 
 // Init 初始化
-func (dnspod *Dnspod) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
+func (dnspod *Dnspod) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	dnspod.Domains.Ipv4Cache = ipv4cache
 	dnspod.Domains.Ipv6Cache = ipv6cache
 	dnspod.DNS = dnsConf.DNS
 	dnspod.Domains.GetNewIp(dnsConf)
+	dnspod.logger = log
 	if dnsConf.TTL == "" {
 		// 默认600s
 		dnspod.TTL = "600"
@@ -128,10 +130,10 @@ func (dnspod *Dnspod) create(domain *ddns.Domain, recordType string, ipAddr stri
 
 	status, err := dnspod.commonRequest(recordCreateAPI, params, domain)
 	if err == nil && status.Status.Code == "1" {
-		log.Printf("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
+		dnspod.logger.Infof("新增域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("新增域名解析 %s 失败！Code: %s, Message: %s", domain, status.Status.Code, status.Status.Message)
+		dnspod.logger.Infof("新增域名解析 %s 失败！Code: %s, Message: %s", domain, status.Status.Code, status.Status.Message)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
@@ -141,7 +143,7 @@ func (dnspod *Dnspod) modify(record DnspodRecord, domain *ddns.Domain, recordTyp
 
 	// 相同不修改
 	if record.Value == ipAddr {
-		log.Printf("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
+		dnspod.logger.Infof("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
 		return
 	}
 
@@ -160,10 +162,10 @@ func (dnspod *Dnspod) modify(record DnspodRecord, domain *ddns.Domain, recordTyp
 	}
 	status, err := dnspod.commonRequest(recordModifyURL, params, domain)
 	if err == nil && status.Status.Code == "1" {
-		log.Printf("更新域名解析 %s 成功！IP: %s", domain, ipAddr)
+		dnspod.logger.Infof("更新域名解析 %s 成功！IP: %s", domain, ipAddr)
 		domain.UpdateStatus = consts.UpdatedSuccess
 	} else {
-		log.Printf("更新域名解析 %s 失败！Code: %s, Message: %s", domain, status.Status.Code, status.Status.Message)
+		dnspod.logger.Infof("更新域名解析 %s 失败！Code: %s, Message: %s", domain, status.Status.Code, status.Status.Message)
 		domain.UpdateStatus = consts.UpdatedFailed
 	}
 }
