@@ -3,7 +3,7 @@ package ddns
 import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/core/cache"
-	"github.com/jxo-me/ddns/x/ddns"
+	"github.com/jxo-me/ddns/sdk/ddns"
 )
 
 // IDDNS interface

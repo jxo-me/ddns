@@ -2,7 +2,7 @@ package hook
 
 import (
 	"github.com/jxo-me/ddns/consts"
-	"github.com/jxo-me/ddns/x/ddns"
+	"github.com/jxo-me/ddns/sdk/ddns"
 )
 
 type IHook interface {

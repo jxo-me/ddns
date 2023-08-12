@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/judwhite/go-svc"
 	"github.com/jxo-me/ddns/core/logger"
-	xlogger "github.com/jxo-me/ddns/x/logger"
+	xlogger "github.com/jxo-me/ddns/sdk/logger"
 	"log"
 	"os"
 	"os/exec"

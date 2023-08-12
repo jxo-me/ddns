@@ -4,7 +4,7 @@ import (
 	"github.com/judwhite/go-svc"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/core/logger"
-	"github.com/jxo-me/ddns/x/app"
+	"github.com/jxo-me/ddns/sdk/app"
 	"os"
 )
 
