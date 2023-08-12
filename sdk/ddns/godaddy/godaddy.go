@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	Code string = "godaddy"
+	Endpoint string = "https://api.godaddy.com/v1/domains"
+	Code     string = "godaddy"
 )
 
 type godaddyRecord struct {
@@ -43,7 +44,7 @@ func (g *GoDaddyDNS) String() string {
 }
 
 func (g *GoDaddyDNS) Endpoint() string {
-	return ""
+	return Endpoint
 }
 
 func (g *GoDaddyDNS) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
@@ -123,8 +124,7 @@ func (g *GoDaddyDNS) sendReq(method string, rType string, domain *ddns.Domain, d
 			body = bytes.NewBuffer(buffer)
 		}
 	}
-	path := fmt.Sprintf("https://api.godaddy.com/v1/domains/%s/records/%s/%s",
-		domain.DomainName, rType, domain.GetSubDomain())
+	path := fmt.Sprintf("%s/%s/records/%s/%s", Endpoint, domain.DomainName, rType, domain.GetSubDomain())
 
 	req, err := http.NewRequest(method, path, body)
 	if err != nil {

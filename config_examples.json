@@ -1,0 +1,404 @@
+{
+  "ddns": [
+    {
+      "name": "alidns",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "alidns",
+        "ID": "$(Your_AccessKey_ID)",
+        "secret": "$(Your_AccessKey_Secret)"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.me"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    },
+    {
+      "name": "baidu",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "baidu",
+        "ID": "$(Your_AccessKey_ID)",
+        "secret": "$(Your_AccessKey_Secret)"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.me"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    },
+    {
+      "name": "callback",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "callback",
+        "ID": "https://dynv6.com/api/update?zone=#{domain}&token=YOUR_TOKEN&ipv4=#{ip}",
+        "secret": "https://dynv6.com/api/update?zone=#{domain}&token=YOUR_TOKEN&ipv4=#{ip}"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.me"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    },
+    {
+      "name": "cloudflare",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "cloudflare",
+        "ID": "",
+        "secret": "xpgliS3t_5i8XsT8PCbFw7Q1F9WEdgnC4ETWaJ24"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.link"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    },
+    {
+      "name": "dnspod",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "dnspod",
+        "ID": "$(Your_ID)",
+        "secret": "$(Your_Token)"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.me"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    },
+    {
+      "name": "godaddy",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "godaddy",
+        "ID": "$(Your_Key)",
+        "secret": "$(Your_Secret)"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.me"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    },
+    {
+      "name": "google",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "google",
+        "ID": "$(Your_Username)",
+        "secret": "$(Your_Password)"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.me"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    },
+    {
+      "name": "huaweicloud",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "huaweicloud",
+        "ID": "$(Your_Access_Key_Id)",
+        "secret": "$(Your_Secret_Access_Key)"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.me"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    },
+    {
+      "name": "namecheap",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "namecheap",
+        "ID": "",
+        "secret": "$(Your_Password)"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.me"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    },
+    {
+      "name": "namesilo",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "namesilo",
+        "ID": "",
+        "secret": "$(Your_Password)"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.me"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    },
+    {
+      "name": "porkbun",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "porkbun",
+        "ID": "$(Your_API_Key)",
+        "secret": "$(Your_Secret_Key)"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.me"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    },
+    {
+      "name": "tencent",
+      "ttl": "600",
+      "delay": 60,
+      "dns": {
+        "name": "tencent",
+        "ID": "$(Your_Secret_Id)",
+        "secret": "$(Your_Secret_Key)"
+      },
+      "webhook": {
+        "webhookURL": "https://127.0.0.1/sendMessage?text=#{ipv4Addr}%0A#{ipv4Result}%0A#{ipv4Domains}",
+        "webhookRequestBody": "",
+        "webhookHeaders": "Authorization: Bearer API_KEY\r\nContent-Type: application/json"
+      },
+      "ipv4": {
+        "enable": true,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": [
+          "ddns.jxo.me"
+        ]
+      },
+      "ipv6": {
+        "enable": false,
+        "netInterface": "eth0",
+        "cmd": "curl -s http://members.3322.org/dyndns/getip",
+        "getType": "url",
+        "url": "https://myip4.ipip.net,https://ddns.oray.com/checkip,https://ip.3322.net,https://4.ipw.cn",
+        "domains": []
+      }
+    }
+  ],
+  "log": {
+    "level": "debug",
+    "output": "stdout"
+  }
+}

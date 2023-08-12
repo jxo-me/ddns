@@ -24,6 +24,7 @@ type Porkbun struct {
 	TTL       string
 	logger    logger.ILogger
 }
+
 type PorkbunDomainRecord struct {
 	Name    *string `json:"name"`    // subdomain
 	Type    *string `json:"type"`    // record type, e.g. A AAAA CNAME
