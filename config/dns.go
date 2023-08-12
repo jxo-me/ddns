@@ -220,7 +220,6 @@ func (conf *DnsConfig) getIpv6AddrFromUrl() string {
 		url = strings.TrimSpace(url)
 		resp, err := client.Get(url)
 		if err != nil {
-			log.Infof("连接失败! <a target='blank' href='%s'>点击查看接口能否返回IPv6地址</a>, 参考说明:<a target='blank' href='%s'>点击访问</a>\n", url, "https://github.com/jeessy2/ddns-go#使用ipv6")
 			log.Infof("错误信息: %s\n", err)
 			continue
 		}

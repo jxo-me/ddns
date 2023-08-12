@@ -84,7 +84,6 @@ func checkParseDomains(domainArr []string) (domains []*Domain) {
 					// 查询字符串是 URL ? 后面的部分。
 					// 查询字符串的存在会导致顶级域名无法与 staticMainDomain 精确匹配，从而被误认为二级域名。
 					// 示例："com.cn?param=value" 将被替换为 "com.cn"。
-					// https://github.com/jeessy2/ddns-go/issues/714
 					if staticMainDomain == strings.Split(domain.DomainName, "?")[0] {
 						domain.DomainName = sp[length-3] + "." + domain.DomainName
 						break

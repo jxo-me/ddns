@@ -77,20 +77,20 @@ func (s *DDNSService) Worker() error {
 			// Check the timer status.
 			switch atomic.LoadInt32(s.status) {
 			case consts.StatusRunning:
-				s.logger.Debugf("DDNS %s 服务正在运行", s.DDNS.String())
+				s.logger.Debugf("%s DDNS service is running!", s.DDNS.String())
 				// Timer proceeding.
 				s.Run()
 			case consts.StatusStopped:
-				s.logger.Debugf("DDNS %s 服务已停止！", s.DDNS.String())
+				s.logger.Debugf("%s DDNS service has been stopped!", s.DDNS.String())
 				// Do nothing.
 			case consts.StatusClosed:
 				// Timer exits.
-				s.logger.Debugf("DDNS %s 服务已关闭！", s.DDNS.String())
+				s.logger.Debugf("%s DDNS service is closed!", s.DDNS.String())
 			}
 		// call to stop polling
 		case confirm := <-s.stop:
 			close(confirm)
-			s.logger.Debugf("DDNS %s 服务已停止！", s.DDNS.String())
+			s.logger.Debugf("%s DDNS service has been manually stopped!", s.DDNS.String())
 			return nil
 		}
 	}
@@ -128,20 +128,19 @@ func (s *DDNSService) waitForNetworkConnected() {
 				// 如果 err 包含回环地址（[::1]:53）则表示没有 DNS 服务器，设置 DNS 服务器
 				if strings.Contains(err.Error(), loopbackServer) && !find {
 					server := "1.1.1.1:53"
-					s.logger.Debugf("解析回环地址 %s 失败！将默认使用 %s，可参考文档通过 -dns 自定义 DNS 服务器",
-						loopbackServer, server)
+					s.logger.Debugf("Failed to resolve loopback address %s! %s will be used by default, you can refer to the documentation to customize the DNS server through -dns", loopbackServer, server)
 
 					_ = os.Setenv(util.DNSServerEnv, server)
 					find = true
 					continue
 				}
 
-				s.logger.Debugf("等待网络连接：%s。%s 后重试...", err, timeout)
+				s.logger.Debugf("Waiting for network connection: %s. Try again in %s...", err, timeout)
 				// 等待 5 秒后重试
 				time.Sleep(timeout)
 				continue
 			}
-			s.logger.Debugf("网络已连接：%s", addr)
+			s.logger.Debugf("The network is connected: %s", addr)
 			// 网络已连接
 			_ = resp.Body.Close()
 			return
