@@ -61,6 +61,7 @@ func (dnspod *Dnspod) Endpoint() string {
 func (dnspod *Dnspod) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	dnspod.Domains.Ipv4Cache = ipv4cache
 	dnspod.Domains.Ipv6Cache = ipv6cache
+	dnspod.Domains.Logger = log
 	dnspod.DNS = dnsConf.DNS
 	dnspod.Domains.GetNewIp(dnsConf)
 	dnspod.logger = log

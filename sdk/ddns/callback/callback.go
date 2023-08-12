@@ -38,6 +38,7 @@ func (cb *Callback) Endpoint() string {
 func (cb *Callback) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	cb.Domains.Ipv4Cache = ipv4cache
 	cb.Domains.Ipv6Cache = ipv6cache
+	cb.Domains.Logger = log
 	cb.lastIpv4 = ipv4cache.GetAddr()
 	cb.lastIpv6 = ipv6cache.GetAddr()
 

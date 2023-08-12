@@ -79,6 +79,7 @@ func (tc *TencentCloud) Endpoint() string {
 func (tc *TencentCloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	tc.Domains.Ipv4Cache = ipv4cache
 	tc.Domains.Ipv6Cache = ipv6cache
+	tc.Domains.Logger = log
 	tc.DNS = dnsConf.DNS
 	tc.Domains.GetNewIp(dnsConf)
 	tc.logger = log

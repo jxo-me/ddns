@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/ddns"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -21,6 +21,7 @@ type Webhook struct {
 	WebhookURL         string
 	WebhookRequestBody string
 	WebhookHeaders     string
+	logger             logger.ILogger
 }
 
 // hasJSONPrefix returns true if the string starts with a JSON open brace.
@@ -28,11 +29,12 @@ func hasJSONPrefix(s string) bool {
 	return strings.HasPrefix(s, "{") || strings.HasPrefix(s, "[")
 }
 
-func NewHook(url string, requestBody string, headers string) *Webhook {
+func NewHook(url string, requestBody string, headers string, log logger.ILogger) *Webhook {
 	return &Webhook{
 		WebhookURL:         url,
 		WebhookRequestBody: requestBody,
 		WebhookHeaders:     headers,
+		logger:             log,
 	}
 }
 
@@ -57,18 +59,18 @@ func (w *Webhook) ExecHook(domains *ddns.Domains) (v4Status consts.UpdateStatusT
 				contentType = "application/json"
 				// 如果 RequestBody 的 JSON 无效但前缀为 JSON 括号则为 JSON
 			} else if hasJSONPrefix(postPara) {
-				log.Println("RequestBody 的 JSON 无效！")
+				w.logger.Infof("RequestBody 的 JSON 无效！")
 			}
 		}
 		requestURL := w.replacePara(domains, w.WebhookURL, v4Status, v6Status)
 		u, err := url.Parse(requestURL)
 		if err != nil {
-			log.Println("Webhook配置中的URL不正确")
+			w.logger.Infof("Webhook配置中的URL不正确")
 			return
 		}
 		req, err := http.NewRequest(method, fmt.Sprintf("%s://%s%s?%s", u.Scheme, u.Host, u.Path, u.Query().Encode()), strings.NewReader(postPara))
 		if err != nil {
-			log.Println("创建Webhook请求异常, Err:", err)
+			w.logger.Infof("创建Webhook请求异常, Err:", err)
 			return
 		}
 
@@ -82,9 +84,9 @@ func (w *Webhook) ExecHook(domains *ddns.Domains) (v4Status consts.UpdateStatusT
 		resp, err := clt.Do(req)
 		body, err := util.GetHTTPResponseOrg(resp, requestURL, err)
 		if err == nil {
-			log.Printf("Webhook调用成功, 返回数据: %q\n", string(body))
+			w.logger.Infof("Webhook调用成功, 返回数据: %q\n", string(body))
 		} else {
-			log.Printf("Webhook调用失败，Err：%s\n", err)
+			w.logger.Infof("Webhook调用失败，Err：%s\n", err)
 		}
 	}
 	return
@@ -144,7 +146,7 @@ func (w *Webhook) CheckParseHeaders(headerStr string) (headers map[string]string
 		if headerStr != "" {
 			parts := strings.Split(headerStr, ":")
 			if len(parts) != 2 {
-				log.Println(headerStr, "Header不正确")
+				w.logger.Infof(headerStr, "Header不正确")
 				continue
 			}
 			headers[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])

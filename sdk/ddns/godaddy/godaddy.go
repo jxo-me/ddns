@@ -49,6 +49,7 @@ func (g *GoDaddyDNS) Endpoint() string {
 func (g *GoDaddyDNS) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	g.domains.Ipv4Cache = ipv4cache
 	g.domains.Ipv6Cache = ipv6cache
+	g.domains.Logger = log
 	g.lastIpv4 = ipv4cache.GetAddr()
 	g.lastIpv6 = ipv6cache.GetAddr()
 

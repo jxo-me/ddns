@@ -42,6 +42,7 @@ func (gd *GoogleDomain) Endpoint() string {
 func (gd *GoogleDomain) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	gd.Domains.Ipv4Cache = ipv4cache
 	gd.Domains.Ipv6Cache = ipv6cache
+	gd.Domains.Logger = log
 	gd.DNS = dnsConf.DNS
 	gd.Domains.GetNewIp(dnsConf)
 	gd.logger = log

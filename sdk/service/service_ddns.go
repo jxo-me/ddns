@@ -53,7 +53,8 @@ func (s *DDNSService) Run() {
 	domains := s.DDNS.AddUpdateDomainRecords()
 	// webhook
 	if s.Conf.Webhook != nil {
-		webhook := hook.NewHook(s.Conf.Webhook.WebhookURL, s.Conf.Webhook.WebhookRequestBody, s.Conf.Webhook.WebhookHeaders)
+		webhook := hook.NewHook(s.Conf.Webhook.WebhookURL, s.Conf.Webhook.WebhookRequestBody,
+			s.Conf.Webhook.WebhookHeaders, s.logger)
 		v4Status, v6Status := webhook.ExecHook(&domains)
 		// 重置单个cache
 		if v4Status == consts.UpdatedFailed {

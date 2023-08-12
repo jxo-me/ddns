@@ -44,6 +44,7 @@ func (nc *NameCheap) Endpoint() string {
 func (nc *NameCheap) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	nc.Domains.Ipv4Cache = ipv4cache
 	nc.Domains.Ipv6Cache = ipv6cache
+	nc.Domains.Logger = log
 	nc.lastIpv4 = ipv4cache.GetAddr()
 	nc.lastIpv6 = ipv6cache.GetAddr()
 

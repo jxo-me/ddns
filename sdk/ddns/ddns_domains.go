@@ -4,7 +4,7 @@ import (
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/core/cache"
-	"log"
+	"github.com/jxo-me/ddns/core/logger"
 	"net/url"
 	"strings"
 )
@@ -20,12 +20,13 @@ type Domains struct {
 	Ipv6Addr    string
 	Ipv6Cache   cache.IIpCache
 	Ipv6Domains []*Domain
+	Logger      logger.ILogger
 }
 
 // GetNewIp 接口/网卡/命令获得 ip 并校验用户输入的域名
 func (domains *Domains) GetNewIp(dnsConf *config.DDnsConfig) {
-	domains.Ipv4Domains = checkParseDomains(dnsConf.Ipv4.Domains)
-	domains.Ipv6Domains = checkParseDomains(dnsConf.Ipv6.Domains)
+	domains.Ipv4Domains = checkParseDomains(dnsConf.Ipv4.Domains, domains.Logger)
+	domains.Ipv6Domains = checkParseDomains(dnsConf.Ipv6.Domains, domains.Logger)
 
 	// IPv4
 	if dnsConf.Ipv4.Enable && len(domains.Ipv4Domains) > 0 {
@@ -39,7 +40,7 @@ func (domains *Domains) GetNewIp(dnsConf *config.DDnsConfig) {
 			if domains.Ipv4Cache.GetFailedTimes() == 3 {
 				domains.Ipv4Domains[0].UpdateStatus = consts.UpdatedFailed
 			}
-			log.Println("Failed to obtain IPv4 address, will not update")
+			domains.Logger.Info("Failed to obtain IPv4 address, will not update")
 		}
 	}
 
@@ -55,14 +56,14 @@ func (domains *Domains) GetNewIp(dnsConf *config.DDnsConfig) {
 			if domains.Ipv6Cache.GetFailedTimes() == 3 {
 				domains.Ipv6Domains[0].UpdateStatus = consts.UpdatedFailed
 			}
-			log.Println("Failed to obtain IPv6 address, will not update")
+			domains.Logger.Info("Failed to obtain IPv6 address, will not update")
 		}
 	}
 
 }
 
 // checkParseDomains 校验并解析用户输入的域名
-func checkParseDomains(domainArr []string) (domains []*Domain) {
+func checkParseDomains(domainArr []string, log logger.ILogger) (domains []*Domain) {
 	for _, domainStr := range domainArr {
 		domainStr = strings.TrimSpace(domainStr)
 		if domainStr != "" {
@@ -74,7 +75,7 @@ func checkParseDomains(domainArr []string) (domains []*Domain) {
 				sp := strings.Split(domainStr, ".")
 				length := len(sp)
 				if length <= 1 {
-					log.Println(domainStr, "Incorrect domain name")
+					log.Info(domainStr, "Incorrect domain name")
 					continue
 				}
 				// 处理域名
@@ -102,13 +103,13 @@ func checkParseDomains(domainArr []string) (domains []*Domain) {
 				sp := strings.Split(dp[1], ".")
 				length := len(sp)
 				if length <= 1 {
-					log.Println(domainStr, "Incorrect domain name")
+					log.Info(domainStr, "Incorrect domain name")
 					continue
 				}
 				domain.DomainName = dp[1]
 				domain.SubDomain = dp[0]
 			} else {
-				log.Println(domainStr, "Incorrect domain name")
+				log.Info(domainStr, "Incorrect domain name")
 				continue
 			}
 
@@ -116,7 +117,7 @@ func checkParseDomains(domainArr []string) (domains []*Domain) {
 			if strings.Contains(domain.DomainName, "?") {
 				u, err := url.Parse("http://" + domain.DomainName)
 				if err != nil {
-					log.Println(domainStr, "domain name resolution failed")
+					log.Info(domainStr, "domain name resolution failed")
 					continue
 				}
 				domain.DomainName = u.Host
@@ -134,7 +135,7 @@ func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDom
 		if domains.Ipv6Cache.Check(domains.Ipv6Addr) {
 			return domains.Ipv6Addr, domains.Ipv6Domains
 		} else {
-			log.Printf("IPv6 has not changed, will wait %d times before comparing with DNS service provider\n", domains.Ipv6Cache.GetTimes())
+			domains.Logger.Infof("IPv6 has not changed, will wait %d times before comparing with DNS service provider\n", domains.Ipv6Cache.GetTimes())
 			return "", domains.Ipv6Domains
 		}
 	}
@@ -142,7 +143,7 @@ func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDom
 	if domains.Ipv4Cache.Check(domains.Ipv4Addr) {
 		return domains.Ipv4Addr, domains.Ipv4Domains
 	} else {
-		log.Printf("IPv4 has not changed, will wait %d times before comparing with DNS service provider\n", domains.Ipv4Cache.GetTimes())
+		domains.Logger.Infof("IPv4 has not changed, will wait %d times before comparing with DNS service provider\n", domains.Ipv4Cache.GetTimes())
 		return "", domains.Ipv4Domains
 	}
 }

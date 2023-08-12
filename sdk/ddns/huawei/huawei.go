@@ -65,6 +65,7 @@ func (hw *Huaweicloud) Endpoint() string {
 func (hw *Huaweicloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	hw.Domains.Ipv4Cache = ipv4cache
 	hw.Domains.Ipv6Cache = ipv6cache
+	hw.Domains.Logger = log
 	hw.DNS = dnsConf.DNS
 	hw.Domains.GetNewIp(dnsConf)
 	hw.logger = log

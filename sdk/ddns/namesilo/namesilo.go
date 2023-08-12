@@ -80,6 +80,7 @@ func (ns *NameSilo) Endpoint() string {
 func (ns *NameSilo) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	ns.Domains.Ipv4Cache = ipv4cache
 	ns.Domains.Ipv6Cache = ipv6cache
+	ns.Domains.Logger = log
 	ns.lastIpv4 = ipv4cache.GetAddr()
 	ns.lastIpv6 = ipv6cache.GetAddr()
 

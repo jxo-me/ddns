@@ -64,6 +64,7 @@ func (ali *Alidns) Endpoint() string {
 func (ali *Alidns) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	ali.Domains.Ipv4Cache = ipv4cache
 	ali.Domains.Ipv6Cache = ipv6cache
+	ali.Domains.Logger = log
 	ali.DNS = dnsConf.DNS
 	ali.Domains.GetNewIp(dnsConf)
 	ali.logger = log

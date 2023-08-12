@@ -72,6 +72,7 @@ func (cf *Cloudflare) Endpoint() string {
 func (cf *Cloudflare) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	cf.Domains.Ipv4Cache = ipv4cache
 	cf.Domains.Ipv6Cache = ipv6cache
+	cf.Domains.Logger = log
 	cf.DNS = dnsConf.DNS
 	cf.Domains.GetNewIp(dnsConf)
 	cf.logger = log

@@ -83,6 +83,7 @@ func (baidu *BaiduCloud) Endpoint() string {
 func (baidu *BaiduCloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	baidu.Domains.Ipv4Cache = ipv4cache
 	baidu.Domains.Ipv6Cache = ipv6cache
+	baidu.Domains.Logger = log
 	baidu.DNS = dnsConf.DNS
 	baidu.Domains.GetNewIp(dnsConf)
 	baidu.logger = log

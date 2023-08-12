@@ -62,6 +62,7 @@ func (pb *Porkbun) Endpoint() string {
 func (pb *Porkbun) Init(conf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache, log logger.ILogger) {
 	pb.Domains.Ipv4Cache = ipv4cache
 	pb.Domains.Ipv6Cache = ipv6cache
+	pb.Domains.Logger = log
 	pb.DNSConfig = conf.DNS
 	pb.Domains.GetNewIp(conf)
 	pb.logger = log
