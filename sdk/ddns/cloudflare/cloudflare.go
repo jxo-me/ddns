@@ -74,6 +74,7 @@ func (cf *Cloudflare) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache,
 	cf.Domains.Ipv6Cache = ipv6cache
 	cf.DNS = dnsConf.DNS
 	cf.Domains.GetNewIp(dnsConf)
+	cf.logger = log
 	if dnsConf.TTL == "" {
 		// 默认1 auto ttl
 		cf.TTL = 1
