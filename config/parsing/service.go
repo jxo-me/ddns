@@ -49,6 +49,6 @@ func ParseService(cfg *config.DDnsConfig, log logger.ILogger) (service.IDDNSServ
 	if dns == nil {
 		return nil, ErrDnsNotSupported
 	}
-	s := xservice.NewDDNS(dns, log, cfg)
+	s := xservice.NewDDNSService(dns, log, cfg)
 	return s, nil
 }

@@ -30,7 +30,7 @@ func (s *DDNSService) String() string {
 	return s.DDNS.String()
 }
 
-func NewDDNS(d ddns.IDDNS, log logger.ILogger, conf *config.DDnsConfig) *DDNSService {
+func NewDDNSService(d ddns.IDDNS, log logger.ILogger, conf *config.DDnsConfig) *DDNSService {
 	st := consts.StatusRunning
 	s := &DDNSService{
 		DDNS:               d,
