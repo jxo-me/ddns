@@ -3,10 +3,11 @@ package baidu
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,7 +22,7 @@ const (
 
 type BaiduCloud struct {
 	DNS     *config.DNS
-	Domains config.Domains
+	Domains ddns.Domains
 	TTL     int
 }
 
@@ -78,7 +79,7 @@ func (baidu *BaiduCloud) Endpoint() string {
 	return Endpoint
 }
 
-func (baidu *BaiduCloud) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (baidu *BaiduCloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	baidu.Domains.Ipv4Cache = ipv4cache
 	baidu.Domains.Ipv6Cache = ipv6cache
 	baidu.DNS = dnsConf.DNS
@@ -97,7 +98,7 @@ func (baidu *BaiduCloud) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCac
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
-func (baidu *BaiduCloud) AddUpdateDomainRecords() config.Domains {
+func (baidu *BaiduCloud) AddUpdateDomainRecords() ddns.Domains {
 	baidu.addUpdateDomainRecords("A")
 	baidu.addUpdateDomainRecords("AAAA")
 	return baidu.Domains
@@ -141,7 +142,7 @@ func (baidu *BaiduCloud) addUpdateDomainRecords(recordType string) {
 }
 
 // create 创建新的解析
-func (baidu *BaiduCloud) create(domain *config.Domain, recordType string, ipAddr string) {
+func (baidu *BaiduCloud) create(domain *ddns.Domain, recordType string, ipAddr string) {
 	var baiduCreateRequest = BaiduCreateRequest{
 		Domain:   domain.GetSubDomain(), //处理一下@
 		RdType:   recordType,
@@ -162,7 +163,7 @@ func (baidu *BaiduCloud) create(domain *config.Domain, recordType string, ipAddr
 }
 
 // modify 更新解析
-func (baidu *BaiduCloud) modify(record BaiduRecord, domain *config.Domain, rdType string, ipAddr string) {
+func (baidu *BaiduCloud) modify(record BaiduRecord, domain *ddns.Domain, rdType string, ipAddr string) {
 	//没有变化直接跳过
 	if record.Rdata == ipAddr {
 		log.Printf("你的IP %s 没有变化, 域名 %s", ipAddr, domain)

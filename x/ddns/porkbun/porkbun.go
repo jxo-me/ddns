@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"log"
 	"net/http"
 )
@@ -19,7 +20,7 @@ const (
 
 type Porkbun struct {
 	DNSConfig *config.DNS
-	Domains   config.Domains
+	Domains   ddns.Domains
 	TTL       string
 }
 type PorkbunDomainRecord struct {
@@ -57,7 +58,7 @@ func (pb *Porkbun) Endpoint() string {
 }
 
 // Init 初始化
-func (pb *Porkbun) Init(conf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (pb *Porkbun) Init(conf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	pb.Domains.Ipv4Cache = ipv4cache
 	pb.Domains.Ipv6Cache = ipv6cache
 	pb.DNSConfig = conf.DNS
@@ -71,7 +72,7 @@ func (pb *Porkbun) Init(conf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6c
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
-func (pb *Porkbun) AddUpdateDomainRecords() config.Domains {
+func (pb *Porkbun) AddUpdateDomainRecords() ddns.Domains {
 	pb.addUpdateDomainRecords("A")
 	pb.addUpdateDomainRecords("AAAA")
 	return pb.Domains
@@ -116,7 +117,7 @@ func (pb *Porkbun) addUpdateDomainRecords(recordType string) {
 }
 
 // 创建
-func (pb *Porkbun) create(domain *config.Domain, recordType *string, ipAddr *string) {
+func (pb *Porkbun) create(domain *ddns.Domain, recordType *string, ipAddr *string) {
 	var response PorkbunResponse
 
 	err := pb.request(
@@ -146,7 +147,7 @@ func (pb *Porkbun) create(domain *config.Domain, recordType *string, ipAddr *str
 }
 
 // 修改
-func (pb *Porkbun) modify(record *PorkbunDomainQueryResponse, domain *config.Domain, recordType *string, ipAddr *string) {
+func (pb *Porkbun) modify(record *PorkbunDomainQueryResponse, domain *ddns.Domain, recordType *string, ipAddr *string) {
 
 	// 相同不修改
 	if len(record.Records) > 0 && *record.Records[0].Content == *ipAddr {

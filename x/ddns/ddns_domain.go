@@ -1,4 +1,4 @@
-package config
+package ddns
 
 import (
 	"github.com/jxo-me/ddns/consts"

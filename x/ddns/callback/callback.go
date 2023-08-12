@@ -2,10 +2,11 @@ package callback
 
 import (
 	"encoding/json"
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"log"
 	"net/http"
 	"net/url"
@@ -18,7 +19,7 @@ const (
 
 type Callback struct {
 	DNS      *config.DNS
-	Domains  config.Domains
+	Domains  ddns.Domains
 	TTL      string
 	lastIpv4 string
 	lastIpv6 string
@@ -33,11 +34,11 @@ func (cb *Callback) Endpoint() string {
 }
 
 // Init 初始化
-func (cb *Callback) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (cb *Callback) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	cb.Domains.Ipv4Cache = ipv4cache
 	cb.Domains.Ipv6Cache = ipv6cache
-	cb.lastIpv4 = ipv4cache.Addr
-	cb.lastIpv6 = ipv6cache.Addr
+	cb.lastIpv4 = ipv4cache.GetAddr()
+	cb.lastIpv6 = ipv6cache.GetAddr()
 
 	cb.DNS = dnsConf.DNS
 	cb.Domains.GetNewIp(dnsConf)
@@ -50,7 +51,7 @@ func (cb *Callback) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, i
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
-func (cb *Callback) AddUpdateDomainRecords() config.Domains {
+func (cb *Callback) AddUpdateDomainRecords() ddns.Domains {
 	cb.addUpdateDomainRecords("A")
 	cb.addUpdateDomainRecords("AAAA")
 	return cb.Domains
@@ -114,7 +115,7 @@ func (cb *Callback) addUpdateDomainRecords(recordType string) {
 }
 
 // replacePara 替换参数
-func replacePara(orgPara, ipAddr string, domain *config.Domain, recordType string, ttl string) (newPara string) {
+func replacePara(orgPara, ipAddr string, domain *ddns.Domain, recordType string, ttl string) (newPara string) {
 	orgPara = strings.ReplaceAll(orgPara, "#{ip}", ipAddr)
 	orgPara = strings.ReplaceAll(orgPara, "#{domain}", domain.String())
 	orgPara = strings.ReplaceAll(orgPara, "#{recordType}", recordType)

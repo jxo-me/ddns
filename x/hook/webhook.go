@@ -3,9 +3,9 @@ package hook
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"log"
 	"net/http"
 	"net/url"
@@ -41,7 +41,7 @@ func (w *Webhook) String() string {
 }
 
 // ExecHook 添加或更新IPv4/IPv6记录, 返回是否有更新失败的
-func (w *Webhook) ExecHook(domains *config.Domains) (v4Status consts.UpdateStatusType, v6Status consts.UpdateStatusType) {
+func (w *Webhook) ExecHook(domains *ddns.Domains) (v4Status consts.UpdateStatusType, v6Status consts.UpdateStatusType) {
 	v4Status = w.getDomainsStatus(domains.Ipv4Domains)
 	v6Status = w.getDomainsStatus(domains.Ipv6Domains)
 
@@ -91,7 +91,7 @@ func (w *Webhook) ExecHook(domains *config.Domains) (v4Status consts.UpdateStatu
 }
 
 // getDomainsStatus 获取域名状态
-func (w *Webhook) getDomainsStatus(domains []*config.Domain) consts.UpdateStatusType {
+func (w *Webhook) getDomainsStatus(domains []*ddns.Domain) consts.UpdateStatusType {
 	successNum := 0
 	for _, v46 := range domains {
 		switch v46.UpdateStatus {
@@ -111,7 +111,7 @@ func (w *Webhook) getDomainsStatus(domains []*config.Domain) consts.UpdateStatus
 }
 
 // replacePara 替换参数
-func (w *Webhook) replacePara(domains *config.Domains, orgPara string, ipv4Result consts.UpdateStatusType, ipv6Result consts.UpdateStatusType) (newPara string) {
+func (w *Webhook) replacePara(domains *ddns.Domains, orgPara string, ipv4Result consts.UpdateStatusType, ipv6Result consts.UpdateStatusType) (newPara string) {
 	orgPara = strings.ReplaceAll(orgPara, "#{ipv4Addr}", domains.Ipv4Addr)
 	orgPara = strings.ReplaceAll(orgPara, "#{ipv4Result}", string(ipv4Result))
 	orgPara = strings.ReplaceAll(orgPara, "#{ipv4Domains}", w.getDomainsStr(domains.Ipv4Domains))
@@ -124,7 +124,7 @@ func (w *Webhook) replacePara(domains *config.Domains, orgPara string, ipv4Resul
 }
 
 // getDomainsStr 用逗号分割域名
-func (w *Webhook) getDomainsStr(domains []*config.Domain) string {
+func (w *Webhook) getDomainsStr(domains []*ddns.Domain) string {
 	str := ""
 	for i, v46 := range domains {
 		str += v46.String()

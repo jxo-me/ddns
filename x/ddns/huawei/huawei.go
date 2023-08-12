@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"log"
 	"net/http"
 	"strconv"
@@ -22,7 +23,7 @@ const (
 // https://support.huaweicloud.com/api-dns/dns_api_64001.html
 type Huaweicloud struct {
 	DNS     *config.DNS
-	Domains config.Domains
+	Domains ddns.Domains
 	TTL     int
 }
 
@@ -60,7 +61,7 @@ func (hw *Huaweicloud) Endpoint() string {
 }
 
 // Init 初始化
-func (hw *Huaweicloud) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (hw *Huaweicloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	hw.Domains.Ipv4Cache = ipv4cache
 	hw.Domains.Ipv6Cache = ipv6cache
 	hw.DNS = dnsConf.DNS
@@ -79,7 +80,7 @@ func (hw *Huaweicloud) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
-func (hw *Huaweicloud) AddUpdateDomainRecords() config.Domains {
+func (hw *Huaweicloud) AddUpdateDomainRecords() ddns.Domains {
 	hw.addUpdateDomainRecords("A")
 	hw.addUpdateDomainRecords("AAAA")
 	return hw.Domains
@@ -128,7 +129,7 @@ func (hw *Huaweicloud) addUpdateDomainRecords(recordType string) {
 }
 
 // 创建
-func (hw *Huaweicloud) create(domain *config.Domain, recordType string, ipAddr string) {
+func (hw *Huaweicloud) create(domain *ddns.Domain, recordType string, ipAddr string) {
 	zone, err := hw.getZones(domain)
 	if err != nil {
 		return
@@ -169,7 +170,7 @@ func (hw *Huaweicloud) create(domain *config.Domain, recordType string, ipAddr s
 }
 
 // 修改
-func (hw *Huaweicloud) modify(record HuaweicloudRecordsets, domain *config.Domain, recordType string, ipAddr string) {
+func (hw *Huaweicloud) modify(record HuaweicloudRecordsets, domain *ddns.Domain, recordType string, ipAddr string) {
 
 	// 相同不修改
 	if len(record.Records) > 0 && record.Records[0] == ipAddr {
@@ -200,7 +201,7 @@ func (hw *Huaweicloud) modify(record HuaweicloudRecordsets, domain *config.Domai
 }
 
 // 获得域名记录列表
-func (hw *Huaweicloud) getZones(domain *config.Domain) (result HuaweicloudZonesResp, err error) {
+func (hw *Huaweicloud) getZones(domain *ddns.Domain) (result HuaweicloudZonesResp, err error) {
 	err = hw.request(
 		"GET",
 		fmt.Sprintf(Endpoint+"/v2/zones?name=%s", domain.DomainName),

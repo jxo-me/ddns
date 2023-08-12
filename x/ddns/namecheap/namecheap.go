@@ -1,10 +1,11 @@
 package namecheap
 
 import (
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"io"
 	"log"
 	"net/http"
@@ -19,7 +20,7 @@ const (
 // NameCheap Domain
 type NameCheap struct {
 	DNS      *config.DNS
-	Domains  config.Domains
+	Domains  ddns.Domains
 	lastIpv4 string
 	lastIpv6 string
 }
@@ -39,18 +40,18 @@ func (nc *NameCheap) Endpoint() string {
 }
 
 // Init 初始化
-func (nc *NameCheap) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (nc *NameCheap) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	nc.Domains.Ipv4Cache = ipv4cache
 	nc.Domains.Ipv6Cache = ipv6cache
-	nc.lastIpv4 = ipv4cache.Addr
-	nc.lastIpv6 = ipv6cache.Addr
+	nc.lastIpv4 = ipv4cache.GetAddr()
+	nc.lastIpv6 = ipv6cache.GetAddr()
 
 	nc.DNS = dnsConf.DNS
 	nc.Domains.GetNewIp(dnsConf)
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
-func (nc *NameCheap) AddUpdateDomainRecords() config.Domains {
+func (nc *NameCheap) AddUpdateDomainRecords() ddns.Domains {
 	nc.addUpdateDomainRecords("A")
 	nc.addUpdateDomainRecords("AAAA")
 	return nc.Domains
@@ -85,7 +86,7 @@ func (nc *NameCheap) addUpdateDomainRecords(recordType string) {
 }
 
 // 修改
-func (nc *NameCheap) modify(domain *config.Domain, recordType string, ipAddr string) {
+func (nc *NameCheap) modify(domain *ddns.Domain, recordType string, ipAddr string) {
 	var result NameCheapResp
 	err := nc.request(&result, ipAddr, domain)
 
@@ -106,7 +107,7 @@ func (nc *NameCheap) modify(domain *config.Domain, recordType string, ipAddr str
 }
 
 // request 统一请求接口
-func (nc *NameCheap) request(result *NameCheapResp, ipAddr string, domain *config.Domain) (err error) {
+func (nc *NameCheap) request(result *NameCheapResp, ipAddr string, domain *ddns.Domain) (err error) {
 	var url string = Endpoint
 	url = strings.ReplaceAll(url, "#{host}", domain.GetSubDomain())
 	url = strings.ReplaceAll(url, "#{domain}", domain.DomainName)

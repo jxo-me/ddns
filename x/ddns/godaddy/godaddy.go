@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"log"
 	"net/http"
 	"strconv"
@@ -28,7 +29,7 @@ type godaddyRecords []godaddyRecord
 
 type GoDaddyDNS struct {
 	dns      *config.DNS
-	domains  config.Domains
+	domains  ddns.Domains
 	ttl      int
 	header   http.Header
 	client   *http.Client
@@ -44,11 +45,11 @@ func (g *GoDaddyDNS) Endpoint() string {
 	return ""
 }
 
-func (g *GoDaddyDNS) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (g *GoDaddyDNS) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	g.domains.Ipv4Cache = ipv4cache
 	g.domains.Ipv6Cache = ipv6cache
-	g.lastIpv4 = ipv4cache.Addr
-	g.lastIpv6 = ipv6cache.Addr
+	g.lastIpv4 = ipv4cache.GetAddr()
+	g.lastIpv6 = ipv6cache.GetAddr()
 
 	g.dns = dnsConf.DNS
 	g.domains.GetNewIp(dnsConf)
@@ -64,7 +65,7 @@ func (g *GoDaddyDNS) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, 
 	g.client = util.CreateHTTPClient()
 }
 
-func (g *GoDaddyDNS) updateDomainRecord(recordType string, ipAddr string, domains []*config.Domain) {
+func (g *GoDaddyDNS) updateDomainRecord(recordType string, ipAddr string, domains []*ddns.Domain) {
 	if ipAddr == "" {
 		return
 	}
@@ -99,7 +100,7 @@ func (g *GoDaddyDNS) updateDomainRecord(recordType string, ipAddr string, domain
 	}
 }
 
-func (g *GoDaddyDNS) AddUpdateDomainRecords() config.Domains {
+func (g *GoDaddyDNS) AddUpdateDomainRecords() ddns.Domains {
 	if ipv4Addr, ipv4Domains := g.domains.GetNewIpResult("A"); ipv4Addr != "" {
 		g.updateDomainRecord("A", ipv4Addr, ipv4Domains)
 	}
@@ -109,7 +110,7 @@ func (g *GoDaddyDNS) AddUpdateDomainRecords() config.Domains {
 	return g.domains
 }
 
-func (g *GoDaddyDNS) sendReq(method string, rType string, domain *config.Domain, data *godaddyRecords) error {
+func (g *GoDaddyDNS) sendReq(method string, rType string, domain *ddns.Domain, data *godaddyRecords) error {
 
 	var body *bytes.Buffer
 	if data != nil {

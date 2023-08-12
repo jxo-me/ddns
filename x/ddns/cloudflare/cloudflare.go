@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,7 +22,7 @@ const (
 // Cloudflare Cloudflare实现
 type Cloudflare struct {
 	DNS     *config.DNS
-	Domains config.Domains
+	Domains ddns.Domains
 	TTL     int
 }
 
@@ -67,7 +68,7 @@ func (cf *Cloudflare) Endpoint() string {
 }
 
 // Init 初始化
-func (cf *Cloudflare) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (cf *Cloudflare) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	cf.Domains.Ipv4Cache = ipv4cache
 	cf.Domains.Ipv6Cache = ipv6cache
 	cf.DNS = dnsConf.DNS
@@ -86,7 +87,7 @@ func (cf *Cloudflare) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache,
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
-func (cf *Cloudflare) AddUpdateDomainRecords() config.Domains {
+func (cf *Cloudflare) AddUpdateDomainRecords() ddns.Domains {
 	cf.addUpdateDomainRecords("A")
 	cf.addUpdateDomainRecords("AAAA")
 	return cf.Domains
@@ -132,7 +133,7 @@ func (cf *Cloudflare) addUpdateDomainRecords(recordType string) {
 }
 
 // 创建
-func (cf *Cloudflare) create(zoneID string, domain *config.Domain, recordType string, ipAddr string) {
+func (cf *Cloudflare) create(zoneID string, domain *ddns.Domain, recordType string, ipAddr string) {
 	record := &CloudflareRecord{
 		Type:    recordType,
 		Name:    domain.String(),
@@ -158,7 +159,7 @@ func (cf *Cloudflare) create(zoneID string, domain *config.Domain, recordType st
 }
 
 // 修改
-func (cf *Cloudflare) modify(result CloudflareRecordsResp, zoneID string, domain *config.Domain, recordType string, ipAddr string) {
+func (cf *Cloudflare) modify(result CloudflareRecordsResp, zoneID string, domain *ddns.Domain, recordType string, ipAddr string) {
 	for _, record := range result.Result {
 		// 相同不修改
 		if record.Content == ipAddr {
@@ -189,7 +190,7 @@ func (cf *Cloudflare) modify(result CloudflareRecordsResp, zoneID string, domain
 }
 
 // 获得域名记录列表
-func (cf *Cloudflare) getZones(domain *config.Domain) (result CloudflareZonesResp, err error) {
+func (cf *Cloudflare) getZones(domain *ddns.Domain) (result CloudflareZonesResp, err error) {
 	err = cf.request(
 		"GET",
 		fmt.Sprintf(Endpoint+"?name=%s&status=%s&per_page=%s", domain.DomainName, "active", "50"),

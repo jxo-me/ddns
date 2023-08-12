@@ -3,10 +3,11 @@ package tencent
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"log"
 	"net/http"
 	"strconv"
@@ -22,7 +23,7 @@ const (
 // https://cloud.tencent.com/document/api/1427/56193
 type TencentCloud struct {
 	DNS     *config.DNS
-	Domains config.Domains
+	Domains ddns.Domains
 	TTL     int
 }
 
@@ -74,7 +75,7 @@ func (tc *TencentCloud) Endpoint() string {
 	return Endpoint
 }
 
-func (tc *TencentCloud) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (tc *TencentCloud) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	tc.Domains.Ipv4Cache = ipv4cache
 	tc.Domains.Ipv6Cache = ipv6cache
 	tc.DNS = dnsConf.DNS
@@ -93,7 +94,7 @@ func (tc *TencentCloud) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCach
 }
 
 // AddUpdateDomainRecords 添加或更新 IPv4/IPv6 记录
-func (tc *TencentCloud) AddUpdateDomainRecords() config.Domains {
+func (tc *TencentCloud) AddUpdateDomainRecords() ddns.Domains {
 	tc.addUpdateDomainRecords("A")
 	tc.addUpdateDomainRecords("AAAA")
 	return tc.Domains
@@ -136,7 +137,7 @@ func (tc *TencentCloud) addUpdateDomainRecords(recordType string) {
 
 // create 添加记录
 // CreateRecord https://cloud.tencent.com/document/api/1427/56180
-func (tc *TencentCloud) create(domain *config.Domain, recordType string, ipAddr string) {
+func (tc *TencentCloud) create(domain *ddns.Domain, recordType string, ipAddr string) {
 	record := &TencentCloudRecord{
 		Domain:     domain.DomainName,
 		SubDomain:  domain.GetSubDomain(),
@@ -163,7 +164,7 @@ func (tc *TencentCloud) create(domain *config.Domain, recordType string, ipAddr 
 
 // modify 修改记录
 // ModifyRecord https://cloud.tencent.com/document/api/1427/56157
-func (tc *TencentCloud) modify(record TencentCloudRecord, domain *config.Domain, recordType string, ipAddr string) {
+func (tc *TencentCloud) modify(record TencentCloudRecord, domain *ddns.Domain, recordType string, ipAddr string) {
 	// 相同不修改
 	if record.Value == ipAddr {
 		log.Printf("你的IP %s 没有变化, 域名 %s", ipAddr, domain)
@@ -192,7 +193,7 @@ func (tc *TencentCloud) modify(record TencentCloudRecord, domain *config.Domain,
 
 // getRecordList 获取域名的解析记录列表
 // DescribeRecordList https://cloud.tencent.com/document/api/1427/56166
-func (tc *TencentCloud) getRecordList(domain *config.Domain, recordType string) (result TencentCloudRecordListsResp, err error) {
+func (tc *TencentCloud) getRecordList(domain *ddns.Domain, recordType string) (result TencentCloudRecordListsResp, err error) {
 	record := TencentCloudRecord{
 		Domain:     domain.DomainName,
 		Subdomain:  domain.GetSubDomain(),
@@ -209,7 +210,7 @@ func (tc *TencentCloud) getRecordList(domain *config.Domain, recordType string) 
 }
 
 // getRecordLine 获取记录线路，为空返回默认
-func (tc *TencentCloud) getRecordLine(domain *config.Domain) string {
+func (tc *TencentCloud) getRecordLine(domain *ddns.Domain) string {
 	if domain.GetCustomParams().Has("RecordLine") {
 		return domain.GetCustomParams().Get("RecordLine")
 	}

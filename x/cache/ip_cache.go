@@ -32,3 +32,23 @@ func (d *IpCache) Check(newAddr string) bool {
 	d.Times--
 	return false
 }
+
+func (d *IpCache) IncreaseFailedTimes() {
+	d.TimesFailedIP++
+}
+
+func (d *IpCache) ResetFailedTimes() {
+	d.TimesFailedIP = 0
+}
+
+func (d *IpCache) GetFailedTimes() int {
+	return d.TimesFailedIP
+}
+
+func (d *IpCache) GetTimes() int {
+	return d.Times
+}
+
+func (d *IpCache) GetAddr() string {
+	return d.Addr
+}

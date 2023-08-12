@@ -1,10 +1,11 @@
 package dnspod
 
 import (
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"log"
 	"net/url"
 )
@@ -20,7 +21,7 @@ const (
 // https://cloud.tencent.com/document/api/302/8516
 type Dnspod struct {
 	DNS     *config.DNS
-	Domains config.Domains
+	Domains ddns.Domains
 	TTL     string
 }
 
@@ -56,7 +57,7 @@ func (dnspod *Dnspod) Endpoint() string {
 }
 
 // Init 初始化
-func (dnspod *Dnspod) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (dnspod *Dnspod) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	dnspod.Domains.Ipv4Cache = ipv4cache
 	dnspod.Domains.Ipv6Cache = ipv6cache
 	dnspod.DNS = dnsConf.DNS
@@ -70,7 +71,7 @@ func (dnspod *Dnspod) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache,
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
-func (dnspod *Dnspod) AddUpdateDomainRecords() config.Domains {
+func (dnspod *Dnspod) AddUpdateDomainRecords() ddns.Domains {
 	dnspod.addUpdateDomainRecords("A")
 	dnspod.addUpdateDomainRecords("AAAA")
 	return dnspod.Domains
@@ -111,7 +112,7 @@ func (dnspod *Dnspod) addUpdateDomainRecords(recordType string) {
 }
 
 // 创建
-func (dnspod *Dnspod) create(domain *config.Domain, recordType string, ipAddr string) {
+func (dnspod *Dnspod) create(domain *ddns.Domain, recordType string, ipAddr string) {
 	params := domain.GetCustomParams()
 	params.Set("login_token", dnspod.DNS.ID+","+dnspod.DNS.Secret)
 	params.Set("domain", domain.DomainName)
@@ -136,7 +137,7 @@ func (dnspod *Dnspod) create(domain *config.Domain, recordType string, ipAddr st
 }
 
 // 修改
-func (dnspod *Dnspod) modify(record DnspodRecord, domain *config.Domain, recordType string, ipAddr string) {
+func (dnspod *Dnspod) modify(record DnspodRecord, domain *ddns.Domain, recordType string, ipAddr string) {
 
 	// 相同不修改
 	if record.Value == ipAddr {
@@ -168,7 +169,7 @@ func (dnspod *Dnspod) modify(record DnspodRecord, domain *config.Domain, recordT
 }
 
 // 公共
-func (dnspod *Dnspod) commonRequest(apiAddr string, values url.Values, domain *config.Domain) (status DnspodStatus, err error) {
+func (dnspod *Dnspod) commonRequest(apiAddr string, values url.Values, domain *ddns.Domain) (status DnspodStatus, err error) {
 	client := util.CreateHTTPClient()
 	resp, err := client.PostForm(
 		apiAddr,
@@ -181,7 +182,7 @@ func (dnspod *Dnspod) commonRequest(apiAddr string, values url.Values, domain *c
 }
 
 // 获得域名记录列表
-func (dnspod *Dnspod) getRecordList(domain *config.Domain, typ string) (result DnspodRecordListResp, err error) {
+func (dnspod *Dnspod) getRecordList(domain *ddns.Domain, typ string) (result DnspodRecordListResp, err error) {
 
 	params := domain.GetCustomParams()
 	params.Set("login_token", dnspod.DNS.ID+","+dnspod.DNS.Secret)

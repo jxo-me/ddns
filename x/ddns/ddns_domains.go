@@ -1,8 +1,9 @@
-package config
+package ddns
 
 import (
-	"github.com/jxo-me/ddns/cache"
+	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"log"
 	"net/url"
 	"strings"
@@ -14,15 +15,15 @@ var staticMainDomains = []string{"com.cn", "org.cn", "net.cn", "ac.cn", "eu.org"
 // Domains Ipv4/Ipv6 domains
 type Domains struct {
 	Ipv4Addr    string
-	Ipv4Cache   *cache.IpCache
+	Ipv4Cache   cache.IIpCache
 	Ipv4Domains []*Domain
 	Ipv6Addr    string
-	Ipv6Cache   *cache.IpCache
+	Ipv6Cache   cache.IIpCache
 	Ipv6Domains []*Domain
 }
 
 // GetNewIp 接口/网卡/命令获得 ip 并校验用户输入的域名
-func (domains *Domains) GetNewIp(dnsConf *DDnsConfig) {
+func (domains *Domains) GetNewIp(dnsConf *config.DDnsConfig) {
 	domains.Ipv4Domains = checkParseDomains(dnsConf.Ipv4.Domains)
 	domains.Ipv6Domains = checkParseDomains(dnsConf.Ipv6.Domains)
 
@@ -31,11 +32,11 @@ func (domains *Domains) GetNewIp(dnsConf *DDnsConfig) {
 		ipv4Addr := dnsConf.GetIpv4Addr()
 		if ipv4Addr != "" {
 			domains.Ipv4Addr = ipv4Addr
-			domains.Ipv4Cache.TimesFailedIP = 0
+			domains.Ipv4Cache.ResetFailedTimes()
 		} else {
 			// 启用IPv4 & 未获取到IP & 填写了域名 & 失败刚好3次，防止偶尔的网络连接失败，并且只发一次
-			domains.Ipv4Cache.TimesFailedIP++
-			if domains.Ipv4Cache.TimesFailedIP == 3 {
+			domains.Ipv4Cache.IncreaseFailedTimes()
+			if domains.Ipv4Cache.GetFailedTimes() == 3 {
 				domains.Ipv4Domains[0].UpdateStatus = consts.UpdatedFailed
 			}
 			log.Println("Failed to obtain IPv4 address, will not update")
@@ -47,11 +48,11 @@ func (domains *Domains) GetNewIp(dnsConf *DDnsConfig) {
 		ipv6Addr := dnsConf.GetIpv6Addr()
 		if ipv6Addr != "" {
 			domains.Ipv6Addr = ipv6Addr
-			domains.Ipv6Cache.TimesFailedIP = 0
+			domains.Ipv6Cache.ResetFailedTimes()
 		} else {
 			// 启用IPv6 & 未获取到IP & 填写了域名 & 失败刚好3次，防止偶尔的网络连接失败，并且只发一次
-			domains.Ipv6Cache.TimesFailedIP++
-			if domains.Ipv6Cache.TimesFailedIP == 3 {
+			domains.Ipv6Cache.IncreaseFailedTimes()
+			if domains.Ipv6Cache.GetFailedTimes() == 3 {
 				domains.Ipv6Domains[0].UpdateStatus = consts.UpdatedFailed
 			}
 			log.Println("Failed to obtain IPv6 address, will not update")
@@ -133,7 +134,7 @@ func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDom
 		if domains.Ipv6Cache.Check(domains.Ipv6Addr) {
 			return domains.Ipv6Addr, domains.Ipv6Domains
 		} else {
-			log.Printf("IPv6 has not changed, will wait %d times before comparing with DNS service provider\n", domains.Ipv6Cache.Times)
+			log.Printf("IPv6 has not changed, will wait %d times before comparing with DNS service provider\n", domains.Ipv6Cache.GetTimes())
 			return "", domains.Ipv6Domains
 		}
 	}
@@ -141,7 +142,7 @@ func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDom
 	if domains.Ipv4Cache.Check(domains.Ipv4Addr) {
 		return domains.Ipv4Addr, domains.Ipv4Domains
 	} else {
-		log.Printf("IPv4 has not changed, will wait %d times before comparing with DNS service provider\n", domains.Ipv4Cache.Times)
+		log.Printf("IPv4 has not changed, will wait %d times before comparing with DNS service provider\n", domains.Ipv4Cache.GetTimes())
 		return "", domains.Ipv4Domains
 	}
 }

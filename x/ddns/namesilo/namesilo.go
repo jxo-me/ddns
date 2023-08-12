@@ -2,10 +2,11 @@ package namesilo
 
 import (
 	"encoding/xml"
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"io"
 	"log"
 	"net/http"
@@ -22,7 +23,7 @@ const (
 // NameSilo Domain
 type NameSilo struct {
 	DNS      *config.DNS
-	Domains  config.Domains
+	Domains  ddns.Domains
 	lastIpv4 string
 	lastIpv6 string
 }
@@ -75,18 +76,18 @@ func (ns *NameSilo) Endpoint() string {
 }
 
 // Init 初始化
-func (ns *NameSilo) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (ns *NameSilo) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	ns.Domains.Ipv4Cache = ipv4cache
 	ns.Domains.Ipv6Cache = ipv6cache
-	ns.lastIpv4 = ipv4cache.Addr
-	ns.lastIpv6 = ipv6cache.Addr
+	ns.lastIpv4 = ipv4cache.GetAddr()
+	ns.lastIpv6 = ipv6cache.GetAddr()
 
 	ns.DNS = dnsConf.DNS
 	ns.Domains.GetNewIp(dnsConf)
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
-func (ns *NameSilo) AddUpdateDomainRecords() config.Domains {
+func (ns *NameSilo) AddUpdateDomainRecords() ddns.Domains {
 	ns.addUpdateDomainRecords("A")
 	ns.addUpdateDomainRecords("AAAA")
 	return ns.Domains
@@ -129,7 +130,7 @@ func (ns *NameSilo) addUpdateDomainRecords(recordType string) {
 }
 
 // 修改
-func (ns *NameSilo) modify(domain *config.Domain, recordID, recordType, ipAddr string, isAdd bool) {
+func (ns *NameSilo) modify(domain *ddns.Domain, recordID, recordType, ipAddr string, isAdd bool) {
 	var err error
 	var result string
 	var requestType string
@@ -156,14 +157,14 @@ func (ns *NameSilo) modify(domain *config.Domain, recordID, recordType, ipAddr s
 	}
 }
 
-func (ns *NameSilo) listRecords(domain *config.Domain) (resp NameSiloDNSListRecordResp, err error) {
+func (ns *NameSilo) listRecords(domain *ddns.Domain) (resp NameSiloDNSListRecordResp, err error) {
 	result, err := ns.request("", domain, "", "", Endpoint)
 	err = xml.Unmarshal([]byte(result), &resp)
 	return
 }
 
 // request 统一请求接口
-func (ns *NameSilo) request(ipAddr string, domain *config.Domain, recordID, recordType, url string) (result string, err error) {
+func (ns *NameSilo) request(ipAddr string, domain *ddns.Domain, recordID, recordType, url string) (result string, err error) {
 	if domain.SubDomain == "@" {
 		url = strings.ReplaceAll(url, "#{host}", "")
 	} else {

@@ -1,10 +1,11 @@
 package google
 
 import (
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"io"
 	"log"
 	"net/http"
@@ -21,7 +22,7 @@ const (
 // https://support.google.com/domains/answer/6147083?hl=zh-Hans#zippy=%2C使用-api-更新您的动态-dns-记录
 type GoogleDomain struct {
 	DNS      *config.DNS
-	Domains  config.Domains
+	Domains  ddns.Domains
 	lastIpv4 string
 	lastIpv6 string
 }
@@ -37,7 +38,7 @@ func (gd *GoogleDomain) Endpoint() string {
 }
 
 // Init 初始化
-func (gd *GoogleDomain) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (gd *GoogleDomain) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	gd.Domains.Ipv4Cache = ipv4cache
 	gd.Domains.Ipv6Cache = ipv6cache
 	gd.DNS = dnsConf.DNS
@@ -45,7 +46,7 @@ func (gd *GoogleDomain) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCach
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
-func (gd *GoogleDomain) AddUpdateDomainRecords() config.Domains {
+func (gd *GoogleDomain) AddUpdateDomainRecords() ddns.Domains {
 	gd.addUpdateDomainRecords("A")
 	gd.addUpdateDomainRecords("AAAA")
 	return gd.Domains
@@ -81,7 +82,7 @@ func (gd *GoogleDomain) String() string {
 }
 
 // 修改
-func (gd *GoogleDomain) modify(domain *config.Domain, recordType string, ipAddr string) {
+func (gd *GoogleDomain) modify(domain *ddns.Domain, recordType string, ipAddr string) {
 	params := domain.GetCustomParams()
 	params.Set("hostname", domain.GetFullDomain())
 	params.Set("myip", ipAddr)

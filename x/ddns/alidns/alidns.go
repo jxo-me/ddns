@@ -2,10 +2,11 @@ package alidns
 
 import (
 	"bytes"
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	"github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/ddns"
 	"log"
 	"net/http"
 	"net/url"
@@ -25,7 +26,7 @@ type Config struct {
 // https://help.aliyun.com/document_detail/29776.html?spm=a2c4g.11186623.6.672.715a45caji9dMA
 type Alidns struct {
 	DNS     *config.DNS
-	Domains config.Domains
+	Domains ddns.Domains
 	TTL     string
 }
 
@@ -59,7 +60,7 @@ func (ali *Alidns) Endpoint() string {
 }
 
 // Init 初始化
-func (ali *Alidns) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ipv6cache *cache.IpCache) {
+func (ali *Alidns) Init(dnsConf *config.DDnsConfig, ipv4cache cache.IIpCache, ipv6cache cache.IIpCache) {
 	ali.Domains.Ipv4Cache = ipv4cache
 	ali.Domains.Ipv6Cache = ipv6cache
 	ali.DNS = dnsConf.DNS
@@ -73,7 +74,7 @@ func (ali *Alidns) Init(dnsConf *config.DDnsConfig, ipv4cache *cache.IpCache, ip
 }
 
 // AddUpdateDomainRecords 添加或更新IPv4/IPv6记录
-func (ali *Alidns) AddUpdateDomainRecords() config.Domains {
+func (ali *Alidns) AddUpdateDomainRecords() ddns.Domains {
 	ali.addUpdateDomainRecords("A")
 	ali.addUpdateDomainRecords("AAAA")
 	return ali.Domains
@@ -122,7 +123,7 @@ func (ali *Alidns) addUpdateDomainRecords(recordType string) {
 }
 
 // 创建
-func (ali *Alidns) create(domain *config.Domain, recordType string, ipAddr string) {
+func (ali *Alidns) create(domain *ddns.Domain, recordType string, ipAddr string) {
 	params := domain.GetCustomParams()
 	params.Set("Action", "AddDomainRecord")
 	params.Set("DomainName", domain.DomainName)
@@ -144,7 +145,7 @@ func (ali *Alidns) create(domain *config.Domain, recordType string, ipAddr strin
 }
 
 // 修改
-func (ali *Alidns) modify(recordSelected AlidnsRecord, domain *config.Domain, recordType string, ipAddr string) {
+func (ali *Alidns) modify(recordSelected AlidnsRecord, domain *ddns.Domain, recordType string, ipAddr string) {
 
 	// 相同不修改
 	if recordSelected.Value == ipAddr {

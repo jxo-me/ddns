@@ -1,12 +1,13 @@
 package service
 
 import (
-	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
+	iCache "github.com/jxo-me/ddns/core/cache"
 	"github.com/jxo-me/ddns/core/ddns"
 	"github.com/jxo-me/ddns/core/logger"
 	"github.com/jxo-me/ddns/internal/util"
+	"github.com/jxo-me/ddns/x/cache"
 	"github.com/jxo-me/ddns/x/hook"
 	"os"
 	"strings"
@@ -16,7 +17,7 @@ import (
 
 type DDNSService struct {
 	DDNS               ddns.IDDNS
-	IpCache            [2]cache.IpCache
+	IpCache            [2]iCache.IIpCache
 	Conf               *config.DDnsConfig
 	Delay              time.Duration
 	ForceCompareGlobal bool
@@ -46,9 +47,9 @@ func NewDDNS(d ddns.IDDNS, log logger.ILogger, conf *config.DDnsConfig) *DDNSSer
 
 func (s *DDNSService) Run() {
 	if s.ForceCompareGlobal {
-		s.IpCache = [2]cache.IpCache{{}, {}}
+		s.IpCache = [2]iCache.IIpCache{&cache.IpCache{}, &cache.IpCache{}}
 	}
-	s.DDNS.Init(s.Conf, &s.IpCache[0], &s.IpCache[1])
+	s.DDNS.Init(s.Conf, s.IpCache[0], s.IpCache[1])
 	domains := s.DDNS.AddUpdateDomainRecords()
 	// webhook
 	if s.Conf.Webhook != nil {
@@ -56,10 +57,10 @@ func (s *DDNSService) Run() {
 		v4Status, v6Status := webhook.ExecHook(&domains)
 		// 重置单个cache
 		if v4Status == consts.UpdatedFailed {
-			s.IpCache[0] = cache.IpCache{}
+			s.IpCache[0] = &cache.IpCache{}
 		}
 		if v6Status == consts.UpdatedFailed {
-			s.IpCache[1] = cache.IpCache{}
+			s.IpCache[1] = &cache.IpCache{}
 		}
 	}
 
