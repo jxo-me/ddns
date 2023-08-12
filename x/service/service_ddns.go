@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/jxo-me/ddns/cache"
 	"github.com/jxo-me/ddns/config"
 	"github.com/jxo-me/ddns/consts"
@@ -38,14 +37,14 @@ func NewDDNS(d ddns.IDDNS, log logger.ILogger, conf *config.DnsConfig) *DDNSServ
 		ForceCompareGlobal: true,
 		status:             &st,
 		logger:             log,
-		Delay:              60 * time.Second,
+		Delay:              time.Second * time.Duration(conf.Delay),
 		Conf:               conf,
 	}
 
 	return s
 }
 
-func (s *DDNSService) RunOnce() {
+func (s *DDNSService) Run() {
 	if s.ForceCompareGlobal {
 		s.IpCache = [2]cache.IpCache{{}, {}}
 	}
@@ -67,9 +66,7 @@ func (s *DDNSService) RunOnce() {
 	s.ForceCompareGlobal = false
 }
 
-func (s *DDNSService) Start() error {
-	// 等待网络连接
-	s.waitForNetworkConnected()
+func (s *DDNSService) Worker() error {
 	var (
 		timerIntervalTicker = time.NewTicker(s.Delay)
 	)
@@ -77,30 +74,37 @@ func (s *DDNSService) Start() error {
 	for {
 		select {
 		case <-timerIntervalTicker.C:
-			fmt.Println("DDNS 服务正在执行...")
 			// Check the timer status.
 			switch atomic.LoadInt32(s.status) {
 			case consts.StatusRunning:
+				s.logger.Debugf("DDNS %s 服务正在运行", s.DDNS.String())
 				// Timer proceeding.
-				s.RunOnce()
+				s.Run()
 			case consts.StatusStopped:
-				fmt.Println("DDNS 服务已暂停！")
+				s.logger.Debugf("DDNS %s 服务已停止！", s.DDNS.String())
 				// Do nothing.
 			case consts.StatusClosed:
 				// Timer exits.
-				fmt.Println("DDNS 服务已关闭！")
+				s.logger.Debugf("DDNS %s 服务已关闭！", s.DDNS.String())
 			}
 		// call to stop polling
 		case confirm := <-s.stop:
 			close(confirm)
-			fmt.Println("DDNS 服务已停止！")
+			s.logger.Debugf("DDNS %s 服务已停止！", s.DDNS.String())
 			return nil
 		}
 	}
 }
 
+func (s *DDNSService) Start() error {
+	// 等待网络连接
+	s.waitForNetworkConnected()
+	// 启动服务
+	return s.Worker()
+}
+
 func (s *DDNSService) Stop() error {
-	st := consts.StatusClosed
+	st := consts.StatusStopped
 	s.status = &st
 	confirm := make(chan struct{})
 	s.stop <- confirm
@@ -137,7 +141,7 @@ func (s *DDNSService) waitForNetworkConnected() {
 				time.Sleep(timeout)
 				continue
 			}
-
+			s.logger.Debugf("网络已连接：%s", addr)
 			// 网络已连接
 			_ = resp.Body.Close()
 			return

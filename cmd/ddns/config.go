@@ -30,7 +30,6 @@ func buildService(cfg *config.Config) (services []service.IDDNSService) {
 			services = append(services, svc)
 		}
 	}
-	log.Debug("build services success", services)
 	return
 }
 

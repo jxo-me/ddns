@@ -28,11 +28,11 @@ type DNS struct {
 type Ipv4 struct {
 	Enable bool `json:"enable"`
 	// 获取IP类型 url/netInterface
-	GetType      string   `json:"getType"` // url/netInterface/cmd
-	URL          string   `json:"url"`
-	NetInterface string   `json:"netInterface"`
-	Cmd          string   `json:"cmd"`
-	Domains      []string `json:"domains"`
+	GetType      string   `yaml:",omitempty" json:"getType"` // url/netInterface/cmd
+	URL          string   `yaml:",omitempty" json:"url"`
+	NetInterface string   `yaml:",omitempty" json:"netInterface"`
+	Cmd          string   `yaml:",omitempty" json:"cmd"`
+	Domains      []string `yaml:",omitempty" json:"domains"`
 }
 
 type Ipv6 struct {
@@ -50,6 +50,7 @@ type Ipv6 struct {
 // DnsConfig 配置
 type DnsConfig struct {
 	Name    string   `json:"name"`
+	Delay   int64    `yaml:",omitempty" json:"delay"`
 	Ipv4    *Ipv4    `yaml:",omitempty"  json:"ipv4"`
 	Ipv6    *Ipv6    `yaml:",omitempty" json:"ipv6"`
 	DNS     *DNS     `yaml:",omitempty" json:"dns"`
@@ -83,7 +84,6 @@ func (conf *DnsConfig) getIpv4AddrFromUrl() string {
 		url = strings.TrimSpace(url)
 		resp, err := client.Get(url)
 		if err != nil {
-			log.Debugf("连接失败! <a target='blank' href='%s'>点击查看接口能否返回IPv4地址</a>\n", url)
 			log.Debugf("错误信息: %s\n", err)
 			continue
 		}
