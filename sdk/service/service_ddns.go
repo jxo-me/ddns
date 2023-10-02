@@ -9,7 +9,6 @@ import (
 	"github.com/jxo-me/ddns/internal/util"
 	"github.com/jxo-me/ddns/sdk/cache"
 	"github.com/jxo-me/ddns/sdk/hook"
-	"os"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -132,7 +131,7 @@ func (s *DDNSService) waitForNetworkConnected() {
 					server := "1.1.1.1:53"
 					s.logger.Debugf("Failed to resolve loopback address %s! %s will be used by default, you can refer to the documentation to customize the DNS server through -dns", loopbackServer, server)
 
-					_ = os.Setenv(util.DNSServerEnv, server)
+					util.NewDialerResolver(server)
 					find = true
 					continue
 				}
