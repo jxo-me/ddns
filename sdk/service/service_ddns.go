@@ -29,6 +29,10 @@ func (s *DDNSService) String() string {
 	return s.DDNS.String()
 }
 
+func (s *DDNSService) Hash() string {
+	return s.DDNS.String()
+}
+
 func NewDDNSService(d ddns.IDDNS, log logger.ILogger, conf *config.DDnsConfig) *DDNSService {
 	st := consts.StatusRunning
 	s := &DDNSService{
@@ -78,20 +82,20 @@ func (s *DDNSService) Worker() error {
 			// Check the timer status.
 			switch atomic.LoadInt32(s.status) {
 			case consts.StatusRunning:
-				s.logger.Debugf("%s DDNS service is running!", s.DDNS.String())
+				s.logger.Debugf("%s DDns service is running!", s.DDNS.String())
 				// Timer proceeding.
 				s.Run()
 			case consts.StatusStopped:
-				s.logger.Debugf("%s DDNS service has been stopped!", s.DDNS.String())
+				s.logger.Debugf("%s DDns service has been stopped!", s.DDNS.String())
 				// Do nothing.
 			case consts.StatusClosed:
 				// Timer exits.
-				s.logger.Debugf("%s DDNS service is closed!", s.DDNS.String())
+				s.logger.Debugf("%s DDns service is closed!", s.DDNS.String())
 			}
 		// call to stop polling
 		case confirm := <-s.stop:
 			close(confirm)
-			s.logger.Debugf("%s DDNS service has been manually stopped!", s.DDNS.String())
+			s.logger.Debugf("%s DDns service has been manually stopped!", s.DDNS.String())
 			return nil
 		}
 	}

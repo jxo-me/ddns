@@ -2,12 +2,12 @@ package logger
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io"
 	"path/filepath"
 	"runtime"
 
 	"github.com/jxo-me/ddns/core/logger"
-	"github.com/sirupsen/logrus"
 )
 
 type LoggerOptions struct {
